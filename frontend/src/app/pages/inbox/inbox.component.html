@@ -1,0 +1,271 @@
+<div class="inbox-page-wrapper">
+  <!-- Top App Header -->
+  <app-header
+    title="Inbox hợp nhất"
+    subtitle="Quản lý tin nhắn Facebook Messenger & Instagram Direct trên cùng một giao diện"
+    actionText=""
+  ></app-header>
+
+  <!-- 3-Column Omnichannel Inbox Layout -->
+  <div class="inbox-container">
+    <!-- Col 1: Conversations List -->
+    <div class="inbox-col-list">
+      <!-- Search & Filters -->
+      <div class="conv-header">
+        <div class="conv-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" placeholder="Tìm theo tên khách, SĐT..." />
+        </div>
+
+        <div class="conv-tabs">
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'ALL'"
+            (click)="activeTab = 'ALL'"
+          >
+            Tất cả
+          </button>
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'HOT_LEAD'"
+            (click)="activeTab = 'HOT_LEAD'"
+          >
+            Hot Lead
+          </button>
+          <button
+            class="tab-btn"
+            [class.active]="activeTab === 'TAKEOVER'"
+            (click)="activeTab = 'TAKEOVER'"
+          >
+            Cần nhân viên
+          </button>
+        </div>
+      </div>
+
+      <!-- Conversations Items -->
+      <div class="conv-items-scroll">
+        @for (conv of conversations(); track conv.id) {
+          <div
+            class="conv-item"
+            [class.selected]="conv.id === selectedConversation().id"
+            (click)="selectConv(conv)"
+          >
+            <div class="conv-avatar">
+              <span>{{ conv.profile.name.charAt(0) }}</span>
+              <span class="channel-dot" [ngClass]="conv.channelType === 'FACEBOOK' ? 'fb' : 'ig'"></span>
+            </div>
+            <div class="conv-content">
+              <div class="conv-row-top">
+                <span class="conv-name">{{ conv.profile.name }}</span>
+                <span class="conv-time">{{ conv.lastMessageDate }}</span>
+              </div>
+              <p class="conv-preview">{{ conv.lastMessage }}</p>
+              <div class="conv-badges">
+                @if (conv.leadTemperature === 'HOT') {
+                  <span class="badge badge-warning">Hot Lead</span>
+                }
+                @if (conv.aiMode === 'AUTO') {
+                  <span class="badge badge-success">AI Tự động</span>
+                }
+                @if (conv.aiMode === 'HUMAN_TAKEOVER') {
+                  <span class="badge badge-danger">Cần nhân viên</span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Col 2: Chat Canvas -->
+    <div class="inbox-col-chat">
+      <!-- Active Chat Header -->
+      <div class="chat-header">
+        <div class="chat-header-user">
+          <div class="user-avatar-main">
+            <span>{{ selectedConversation().profile.name.charAt(0) }}</span>
+          </div>
+          <div class="chat-user-details">
+            <div class="chat-user-name">
+              {{ selectedConversation().profile.name }}
+              <span class="channel-pill" [ngClass]="selectedConversation().channelType === 'FACEBOOK' ? 'fb' : 'ig'">
+                {{ selectedConversation().channelType }}
+              </span>
+            </div>
+            <div class="chat-sub">
+              @if (selectedConversation().aiMode === 'AUTO') {
+                <span class="text-emerald">● AI đang trả lời tự động (97% Confidence)</span>
+              } @else {
+                <span class="text-amber">● Nhân viên đang hỗ trợ trực tiếp</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-header-actions">
+          <button class="btn btn-outline btn-sm" (click)="takeOver()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+            <span>Take over</span>
+          </button>
+          <button class="btn btn-primary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Đóng Lead</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Stream -->
+      <div class="chat-messages-container">
+        <div class="chat-date-divider">
+          <span>HÔM NAY, 28 THÁNG 9, 2026</span>
+        </div>
+
+        @for (msg of messages(); track msg.id) {
+          <div
+            class="msg-bubble-wrapper"
+            [class.inbound]="msg.direction === 'INBOUND'"
+            [class.outbound]="msg.direction === 'OUTBOUND'"
+          >
+            @if (msg.direction === 'OUTBOUND') {
+              <div class="msg-sender-tag">
+                @if (msg.senderType === 'AI') {
+                  <span class="badge badge-purple">🤖 Trợ lý AI Mia (Tự động)</span>
+                } @else {
+                  <span class="badge badge-info">👤 CSKH</span>
+                }
+              </div>
+            }
+            <div class="msg-bubble">
+              <p class="msg-text">{{ msg.content }}</p>
+              <span class="msg-time">{{ msg.timestamp }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Smart AI Suggestion Bar -->
+        <div class="ai-suggestion-card">
+          <div class="ai-suggestion-top">
+            <div class="ai-sugg-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sparkle-icon">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+              </svg>
+              <span>Gợi ý trả lời thông minh từ AI (97% tự tin)</span>
+            </div>
+            <button class="btn-apply-sugg" (click)="applyAiSuggestion()">
+              Áp dụng câu này
+            </button>
+          </div>
+          <p class="ai-suggestion-content">
+            "Dạ chào anh Minh! EVN Shop có thể giao máy hỏa tốc trong 2h tại Hà Nội ạ. Anh cho em xin địa chỉ chính xác để em lên đơn nhé!"
+          </p>
+        </div>
+      </div>
+
+      <!-- Chat Input Area -->
+      <div class="chat-input-area">
+        <div class="chat-input-actions-top">
+          <button class="input-tool-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Mẫu câu nhanh</span>
+          </button>
+          <button class="input-tool-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+            </svg>
+            <span>Đính kèm ảnh</span>
+          </button>
+          <button class="input-tool-btn">
+            <span>🏷️ Ghi chú nội bộ</span>
+          </button>
+        </div>
+
+        <div class="chat-input-row">
+          <textarea
+            [(ngModel)]="newMessageText"
+            (keydown.enter)="$event.preventDefault(); sendMessage()"
+            placeholder="Nhập tin nhắn phản hồi khách hàng... (Enter để gửi)"
+            rows="2"
+          ></textarea>
+          <button class="btn btn-primary send-btn" (click)="sendMessage()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 3: Lead CRM Sidebar -->
+    <div class="inbox-col-crm">
+      <div class="crm-header">
+        <h4 class="crm-title">Hồ sơ khách hàng & Lead</h4>
+        <span class="badge badge-warning">HOT LEAD</span>
+      </div>
+
+      <!-- Lead Score Circle Card -->
+      <div class="lead-score-card">
+        <div class="score-circle">
+          <span class="score-num">86</span>
+          <span class="score-max">/100</span>
+        </div>
+        <div class="score-info">
+          <div class="score-title">Điểm tiềm năng (AI Score)</div>
+          <div class="score-desc">Khách có nhu cầu mua cao, quan tâm giá và kho hàng gần nhất</div>
+        </div>
+      </div>
+
+      <!-- Customer Properties -->
+      <div class="crm-properties">
+        <div class="prop-group">
+          <span class="prop-label">Họ và tên</span>
+          <span class="prop-val">{{ selectedConversation().profile.name }}</span>
+        </div>
+        <div class="prop-group">
+          <span class="prop-label">Số điện thoại</span>
+          <span class="prop-val text-primary">{{ selectedConversation().profile.phone || 'Chưa cung cấp' }}</span>
+        </div>
+        <div class="prop-group">
+          <span class="prop-label">Khu vực</span>
+          <span class="prop-val">{{ selectedConversation().profile.location || 'Hà Nội' }}</span>
+        </div>
+        <div class="prop-group">
+          <span class="prop-label">Sản phẩm quan tâm</span>
+          <span class="prop-val font-semibold">iPhone 17 Pro 256GB Titan</span>
+        </div>
+        <div class="prop-group">
+          <span class="prop-label">Kênh tương tác</span>
+          <span class="badge badge-meta">Facebook Page (EVN Shop)</span>
+        </div>
+        <div class="prop-group">
+          <span class="prop-label">Tags nhận diện</span>
+          <div class="tags-wrapper">
+            @for (tag of selectedConversation().tags; track tag) {
+              <span class="badge badge-info">{{ tag }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Internal Activity Notes -->
+      <div class="crm-notes-section">
+        <div class="crm-section-title">Ghi chú xử lý</div>
+        <div class="note-card">
+          <div class="note-time">10:14 - AI Agent Mia</div>
+          <p class="note-text">Đã phát hiện ý định hỏi hàng có sẵn và xác nhận còn 3 máy tại Cầu Giấy.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

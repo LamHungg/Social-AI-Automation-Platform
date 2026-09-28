@@ -1,0 +1,159 @@
+<div class="page-container ai-agent-page">
+  <app-header
+    title="Cấu hình AI Agent"
+    subtitle="Huấn luyện tính cách Agent, thiết lập System Prompt, quy tắc chuyển giao CSKH và kiểm thử Sandbox"
+    actionText="Lưu cấu hình"
+    (actionClick)="saveConfig()"
+  ></app-header>
+
+  <div class="ai-agent-layout">
+    <!-- Col 1: Persona & Prompt Settings -->
+    <div class="config-col">
+      <!-- Section: Performance Overview -->
+      <div class="perf-badges-card card">
+        <div class="perf-metric">
+          <span class="m-val text-emerald">{{ config().autoSolveRate }}%</span>
+          <span class="m-label">Tự động giải quyết</span>
+        </div>
+        <div class="perf-metric">
+          <span class="m-val text-amber">{{ config().escalationRate }}%</span>
+          <span class="m-label">Chuyển giao nhân viên</span>
+        </div>
+        <div class="perf-metric">
+          <span class="m-val text-primary">{{ config().csatScore }} / 5.0 ⭐</span>
+          <span class="m-label">Đánh giá hài lòng CSAT</span>
+        </div>
+      </div>
+
+      <!-- Section: Agent Persona -->
+      <div class="config-card card">
+        <h3 class="section-title">Nhận diện & Phong cách Agent</h3>
+
+        <div class="form-group">
+          <label>Tên đại diện AI</label>
+          <input type="text" [value]="config().name" />
+        </div>
+
+        <div class="form-group">
+          <label>Mô tả vai trò</label>
+          <input type="text" [value]="config().roleDescription" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Tone giọng mặc định</label>
+            <select>
+              <option selected>Thân thiện & Tận tâm (Friendly)</option>
+              <option>Chuyên nghiệp & Chuẩn mực (Professional)</option>
+              <option>Ngắn gọn & Súc tích (Concise)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label>Ngôn ngữ chính</label>
+            <select>
+              <option selected>Tiếng Việt (Vietnamese)</option>
+              <option>English</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <label class="toggle-check">
+            <input type="checkbox" [checked]="config().useEmojis" />
+            <span>Sử dụng Icon / Emoji thân thiện trong câu trả lời</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Section: System Prompt -->
+      <div class="config-card card">
+        <h3 class="section-title">System Prompt (Chỉ dẫn hệ thống)</h3>
+        <p class="section-desc">Định hình quy tắc ứng xử, cách thu thập SĐT và kiến thức sản phẩm</p>
+        <textarea rows="8" class="prompt-textarea" [value]="config().systemPrompt"></textarea>
+      </div>
+
+      <!-- Section: Fallback & Handoff -->
+      <div class="config-card card">
+        <h3 class="section-title">Quy tắc Chuyển giao CSKH (Fallback & Handoff)</h3>
+        <p class="section-desc">Tự động gắn cờ cho nhân viên khi phát hiện khách khiếu nại hoặc tin cậy thấp</p>
+
+        <div class="form-group">
+          <label>Ngưỡng tin cậy tối thiểu (Fallback Threshold)</label>
+          <input type="number" step="0.05" min="0.1" max="1" [value]="config().fallbackThreshold" />
+        </div>
+
+        <div class="form-group">
+          <label>Từ khóa chuyển nhân viên lập tức</label>
+          <div class="tags-container">
+            @for (kw of config().fallbackKeywords; track kw) {
+              <span class="badge badge-danger">{{ kw }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 2: Live Sandbox Simulator & Knowledge Base -->
+    <div class="sandbox-col">
+      <div class="sandbox-card card">
+        <div class="sandbox-header">
+          <div class="sandbox-title-group">
+            <h3 class="section-title">AI Sandbox Simulator</h3>
+            <span class="live-dot-pill">● Trực tiếp</span>
+          </div>
+          <button class="btn btn-outline btn-xs" (click)="sandboxMessages = []">Làm mới chat</button>
+        </div>
+
+        <!-- Chat Stream -->
+        <div class="sandbox-chat-area">
+          @for (msg of sandboxMessages; track msg.text) {
+            <div class="sb-bubble-wrapper" [class.user]="msg.sender === 'user'" [class.ai]="msg.sender === 'ai'">
+              <div class="sb-bubble">
+                <span class="sb-sender">{{ msg.sender === 'ai' ? 'Mia (AI)' : 'Bạn (Khách hàng)' }}</span>
+                <p class="sb-text">{{ msg.text }}</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Chat Input -->
+        <div class="sandbox-input-row">
+          <input
+            type="text"
+            [(ngModel)]="sandboxInput"
+            (keydown.enter)="sendSandboxMessage()"
+            placeholder="Nhắn tin thử nghiệm với AI Mia..."
+          />
+          <button class="btn btn-primary btn-sm" (click)="sendSandboxMessage()">Gửi test</button>
+        </div>
+      </div>
+
+      <!-- Knowledge Base Documents -->
+      <div class="kb-card card">
+        <div class="kb-header">
+          <h3 class="section-title">Cơ sở tri thức (Knowledge Base)</h3>
+          <button class="btn btn-outline btn-xs">+ Thêm tài liệu</button>
+        </div>
+
+        <div class="kb-docs-list">
+          <div class="kb-doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <span class="doc-title">Bảng giá iPhone & MacBook Q3-2026.pdf</span>
+              <span class="doc-meta">Đã đồng bộ • 142 sản phẩm</span>
+            </div>
+            <span class="badge badge-success">ACTIVE</span>
+          </div>
+          <div class="kb-doc-item">
+            <div class="doc-icon">📄</div>
+            <div class="doc-info">
+              <span class="doc-title">Chính sách bảo hành & Freeship EVN.docx</span>
+              <span class="doc-meta">Đã đồng bộ • 32 điều khoản</span>
+            </div>
+            <span class="badge badge-success">ACTIVE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

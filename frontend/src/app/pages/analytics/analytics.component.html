@@ -1,0 +1,117 @@
+<div class="page-container analytics-page">
+  <app-header
+    title="Báo cáo & Phân tích"
+    subtitle="Đo lường hiệu quả phễu chuyển đổi, tỷ lệ giải quyết tự động bằng AI và chỉ số chất lượng dịch vụ SLA"
+    actionText="Xuất báo cáo PDF"
+  ></app-header>
+
+  <div class="analytics-content">
+    <!-- Top 3 Big Stat Cards -->
+    <div class="stats-overview-grid">
+      <div class="stat-big-card card">
+        <span class="sb-label">TỔNG TIN NHẮN & COMMENT XỬ LÝ</span>
+        <div class="sb-value">3,842</div>
+        <span class="sb-sub text-emerald">+24.6% so với tháng trước</span>
+      </div>
+
+      <div class="stat-big-card card">
+        <span class="sb-label">TỶ LỆ GIẢI QUYẾT BẰNG AI</span>
+        <div class="sb-value text-primary">72.4%</div>
+        <span class="sb-sub">Tiết kiệm ~560 giờ làm việc CSKH</span>
+      </div>
+
+      <div class="stat-big-card card">
+        <span class="sb-label">LƯỢNG HOT LEAD THU THẬP</span>
+        <div class="sb-value text-amber">312</div>
+        <span class="sb-sub text-emerald">+45 lead so với tuần trước</span>
+      </div>
+    </div>
+
+    <!-- Funnel & Channel Breakdown Grid -->
+    <div class="analytics-main-grid">
+      <!-- Funnel Card -->
+      <div class="funnel-card card">
+        <h3 class="section-title">Phễu chuyển đổi khách hàng (Conversion Funnel)</h3>
+        <p class="section-desc">Từ tương tác bài viết/inbox đến chốt đơn thành công</p>
+
+        <div class="funnel-bars-container">
+          @for (step of funnelSteps; track step.label) {
+            <div class="funnel-step">
+              <div class="step-meta">
+                <span class="step-name">{{ step.label }}</span>
+                <span class="step-counts">
+                  <strong>{{ step.count.toLocaleString() }}</strong> ({{ step.percent }})
+                </span>
+              </div>
+              <div class="step-bar-bg">
+                <div class="step-bar-fill" [ngClass]="'fill-' + step.color" [style.width]="step.percent"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- SLA & Quality Card -->
+      <div class="sla-card card">
+        <h3 class="section-title">Chỉ số chất lượng dịch vụ (SLA)</h3>
+        <p class="section-desc">Mức độ hài lòng và cam kết thời gian phản hồi</p>
+
+        <div class="sla-metrics-list">
+          <div class="sla-item">
+            <div class="sla-info">
+              <span class="sla-title">Thời gian phản hồi đầu tiên (FRT)</span>
+              <span class="sla-sub">Tiêu chuẩn: &lt; 30 giây</span>
+            </div>
+            <div class="sla-val text-emerald">4.8 giây</div>
+          </div>
+
+          <div class="sla-item">
+            <div class="sla-info">
+              <span class="sla-title">Độ tuân thủ SLA (SLA Compliance)</span>
+              <span class="sla-sub">Đạt 98.7% chỉ tiêu tuần</span>
+            </div>
+            <div class="sla-val text-emerald">98.7%</div>
+          </div>
+
+          <div class="sla-item">
+            <div class="sla-info">
+              <span class="sla-title">Điểm hài lòng khách hàng (CSAT)</span>
+              <span class="sla-sub">Dựa trên 450 lượt đánh giá</span>
+            </div>
+            <div class="sla-val text-amber">4.6 / 5.0 ⭐</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Automations Table -->
+    <div class="top-auto-card card">
+      <h3 class="section-title">Top kịch bản Automation hiệu quả nhất</h3>
+
+      <div class="table-wrapper">
+        <table class="auto-table">
+          <thead>
+            <tr>
+              <th>TÊN KỊCH BẢN</th>
+              <th>SỐ LẦN CHẠY</th>
+              <th>TỶ LỆ THÀNH CÔNG</th>
+              <th>LEAD TẠO RA</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (auto of topAutomations; track auto.name) {
+              <tr>
+                <td class="font-semibold">{{ auto.name }}</td>
+                <td>{{ auto.runs }} lượt</td>
+                <td class="text-emerald">{{ auto.successRate }}</td>
+                <td>
+                  <span class="badge badge-warning">{{ auto.leads }} leads</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

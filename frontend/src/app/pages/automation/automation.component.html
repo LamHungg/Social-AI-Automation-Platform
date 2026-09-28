@@ -1,0 +1,195 @@
+<div class="page-container automation-page">
+  <app-header
+    title="Automation Builder"
+    subtitle="Xây dựng luồng tự động hóa trực quan (Trigger -> AI Condition -> Action Pipeline)"
+    actionText="Tạo kịch bản mới"
+  ></app-header>
+
+  <div class="builder-layout">
+    <!-- Col 1: Rules List -->
+    <div class="rules-col">
+      <div class="rules-header">
+        <h3 class="rules-heading">Danh sách kịch bản</h3>
+        <span class="badge badge-success">{{ rules().length }} Đang chạy</span>
+      </div>
+
+      <div class="rules-list">
+        @for (rule of rules(); track rule.id) {
+          <div
+            class="rule-card"
+            [class.selected]="rule.id === selectedRule().id"
+            (click)="selectRule(rule)"
+          >
+            <div class="rule-top">
+              <span class="badge badge-success">ACTIVE</span>
+              <span class="rule-runs">{{ rule.runsCount }} lượt chạy</span>
+            </div>
+            <div class="rule-name">{{ rule.name }}</div>
+            <div class="rule-desc">{{ rule.description }}</div>
+            <div class="rule-meta">
+              <span class="rule-rate">Tỷ lệ thành công: {{ rule.successRate }}%</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Col 2: Visual Canvas (Graph View) -->
+    <div class="canvas-col">
+      <div class="canvas-header">
+        <div class="canvas-title-group">
+          <h2 class="canvas-title">{{ selectedRule().name }}</h2>
+          <span class="canvas-updated">Cập nhật lần cuối: {{ selectedRule().updatedAt }}</span>
+        </div>
+        <div class="canvas-actions">
+          <button class="btn btn-outline btn-sm">Lưu bản nháp</button>
+          <button class="btn btn-primary btn-sm">Xuất bản luồng (Publish)</button>
+        </div>
+      </div>
+
+      <!-- Node Flow Visualizer -->
+      <div class="flow-canvas-container">
+        <!-- Node 1: Trigger -->
+        <div class="flow-node trigger-node">
+          <div class="node-header">
+            <span class="node-pill pill-amber">TRIGGER</span>
+            <span class="node-title">Sự kiện kích hoạt</span>
+          </div>
+          <div class="node-body">
+            <p class="node-desc">Nhận diện bình luận hoặc tin nhắn chứa từ khóa:</p>
+            <div class="keyword-tags">
+              @for (kw of selectedRule().triggers; track kw) {
+                <span class="tag-keyword">{{ kw }}</span>
+              }
+            </div>
+          </div>
+          <div class="node-connector-down"></div>
+        </div>
+
+        <!-- Node 2: AI Condition -->
+        <div class="flow-node condition-node">
+          <div class="node-header">
+            <span class="node-pill pill-purple">AI CONDITION</span>
+            <span class="node-title">Đánh giá Ý định & Ngưỡng tin cậy</span>
+          </div>
+          <div class="node-body">
+            <div class="condition-row">
+              <span>Intent nhận diện:</span>
+              <span class="badge badge-meta">ASK_PRICE</span>
+            </div>
+            <div class="condition-row">
+              <span>Độ tin cậy tối thiểu:</span>
+              <span class="badge badge-success">&ge; {{ selectedRule().confidenceThreshold }}</span>
+            </div>
+          </div>
+          <div class="node-connector-down"></div>
+        </div>
+
+        <!-- Node 3: Actions Pipeline -->
+        <div class="flow-node action-node">
+          <div class="node-header">
+            <span class="node-pill pill-blue">ACTION PIPELINE</span>
+            <span class="node-title">Chuỗi hành động tự động</span>
+          </div>
+          <div class="node-body action-list">
+            @for (act of selectedRule().actionsSummary; track act; let idx = $index) {
+              <div class="action-item">
+                <span class="action-idx">{{ idx + 1 }}</span>
+                <span class="action-text">{{ act }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulator Drawer -->
+      <div class="simulator-card">
+        <div class="sim-header">
+          <div class="sim-title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Trình giả lập thử nghiệm kịch bản (Live Simulator)</span>
+          </div>
+        </div>
+        <div class="sim-body">
+          <div class="sim-input-row">
+            <input
+              type="text"
+              [(ngModel)]="testInputText"
+              placeholder="Nhập câu khách nhắn để chạy thử..."
+              class="sim-input"
+            />
+            <button class="btn btn-primary btn-sm" (click)="runSimulation()">
+              Chạy thử nghiệm
+            </button>
+          </div>
+
+          @if (simulationResult) {
+            <div class="sim-result-box">
+              <div class="res-meta">
+                <span>Ý định phát hiện: <strong>{{ simulationResult.matchedIntent }}</strong></span>
+                <span>Độ tin cậy: <strong>{{ (simulationResult.confidence * 100) | number:'1.0-0' }}%</strong></span>
+                <span class="badge badge-success">✓ Kích hoạt thành công</span>
+              </div>
+              <div class="res-actions-list">
+                @for (action of simulationResult.executedActions; track action) {
+                  <div class="res-action-item">
+                    <span class="check-icon">✓</span>
+                    <span>{{ action }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Col 3: Inspector / Settings -->
+    <div class="inspector-col">
+      <h3 class="inspector-heading">Cấu hình tham số</h3>
+
+      <div class="inspector-section">
+        <label class="param-label">Ngưỡng tin cậy (Confidence Threshold)</label>
+        <div class="slider-row">
+          <input type="range" min="0.5" max="1.0" step="0.05" [value]="selectedRule().confidenceThreshold" />
+          <span class="slider-val">{{ selectedRule().confidenceThreshold }}</span>
+        </div>
+        <p class="param-help">Nếu điểm tin cậy dưới ngưỡng này, hệ thống sẽ tự động chuyển sang fallback.</p>
+      </div>
+
+      <div class="inspector-section">
+        <label class="param-label">Kênh áp dụng</label>
+        <div class="channel-toggles">
+          <label class="toggle-item">
+            <input type="checkbox" checked /> Facebook Page (EVN Shop)
+          </label>
+          <label class="toggle-item">
+            <input type="checkbox" checked /> Instagram (&#64;evnshop.official)
+          </label>
+        </div>
+      </div>
+
+      <div class="inspector-section">
+        <label class="param-label">Chế độ Fallback</label>
+        <select class="fallback-select">
+          <option>Gán cờ cho CSKH can thiệp (Human Handover)</option>
+          <option>Trả lời câu mặc định và xin SĐT</option>
+          <option>Không làm gì</option>
+        </select>
+      </div>
+
+      <div class="inspector-stats">
+        <div class="stat-card">
+          <span class="st-num">{{ selectedRule().runsCount }}</span>
+          <span class="st-label">Lượt thực thi tuần này</span>
+        </div>
+        <div class="stat-card">
+          <span class="st-num text-emerald">{{ selectedRule().successRate }}%</span>
+          <span class="st-label">Tỷ lệ chạy chuẩn xác</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,263 @@
+<div class="page-container dashboard-page">
+  <app-header
+    title="Tổng quan vận hành AI"
+    subtitle="Theo dõi hiệu suất đa kênh Facebook & Instagram theo thời gian thực"
+    actionText="Tạo automation mới"
+    (actionClick)="navigateTo('/automations')"
+  ></app-header>
+
+  <div class="dashboard-content">
+    <!-- Top 4 KPI Cards -->
+    <div class="kpi-grid">
+      <!-- Card 1: Kênh kết nối -->
+      <div class="card kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">KÊNH KẾT NỐI</span>
+          <div class="kpi-icon-wrapper icon-blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle>
+              <circle cx="6" cy="12" r="3"></circle>
+              <circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value">{{ mockData.kpis.connectedChannels }}</div>
+        <div class="kpi-footer text-emerald">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>{{ mockData.kpis.channelsGrowthText }}</span>
+        </div>
+      </div>
+
+      <!-- Card 2: AI Trả lời -->
+      <div class="card kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">AI TRẢ LỜI TỰ ĐỘNG</span>
+          <div class="kpi-icon-wrapper icon-purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+              <circle cx="12" cy="5" r="2"></circle>
+              <path d="M12 7v4"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value">{{ mockData.kpis.aiRepliedCount.toLocaleString() }}</div>
+        <div class="kpi-footer text-emerald">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+          <span>+{{ mockData.kpis.aiRepliedGrowth }}% so với tuần trước</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Hot Lead -->
+      <div class="card kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">HOT LEAD TỰ ĐỘNG</span>
+          <div class="kpi-icon-wrapper icon-amber">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value">{{ mockData.kpis.hotLeadsCount }}</div>
+        <div class="kpi-footer text-emerald">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <span>+{{ mockData.kpis.hotLeadsGrowth }} lead mới hôm nay</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Chuyển nhân viên -->
+      <div class="card kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-label">CHUYỂN NHÂN VIÊN</span>
+          <div class="kpi-icon-wrapper icon-rose">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <polyline points="16 11 18 13 22 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="kpi-value">{{ mockData.kpis.escalationCount }}</div>
+        <div class="kpi-footer text-muted">
+          <span>{{ mockData.kpis.escalationPercent }}% trên tổng hội thoại</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts & Interactive Queue Grid -->
+    <div class="dashboard-main-grid">
+      <!-- Left Column: Hiệu suất Automation 7 ngày -->
+      <div class="card performance-card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="section-title">Hiệu suất Automation (7 ngày)</h3>
+            <p class="section-desc">Tỷ lệ xử lý thành công đạt 96.8% trên toàn bộ luồng</p>
+          </div>
+          <div class="chart-stat-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+            </svg>
+            <span>96.8% Tự động</span>
+          </div>
+        </div>
+
+        <!-- Custom Bar Visualization -->
+        <div class="bar-chart-container">
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot dot-blue"></span> Comments (2,431)</span>
+            <span class="legend-item"><span class="legend-dot dot-purple"></span> Tin nhắn DM (1,026)</span>
+            <span class="legend-item"><span class="legend-dot dot-amber"></span> Lead phát hiện (312)</span>
+          </div>
+
+          <div class="bars-wrapper">
+            @for (item of chartDays; track item.day) {
+              <div class="bar-col">
+                <div class="bar-stack">
+                  <div class="bar-segment seg-comment" [style.height.%]="item.comment"></div>
+                  <div class="bar-segment seg-dm" [style.height.%]="item.dm"></div>
+                  <div class="bar-segment seg-lead" [style.height.%]="item.lead"></div>
+                </div>
+                <span class="bar-day-label">{{ item.day }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Metric Row -->
+        <div class="perf-summary-row">
+          <div class="perf-stat">
+            <span class="stat-label">Thời gian phản hồi TB</span>
+            <span class="stat-val">4.8 giây</span>
+          </div>
+          <div class="perf-stat">
+            <span class="stat-label">Chất lượng trả lời (CSAT)</span>
+            <span class="stat-val">4.6 / 5.0 ⭐</span>
+          </div>
+          <div class="perf-stat">
+            <span class="stat-label">Tiết kiệm nhân sự</span>
+            <span class="stat-val">~140 giờ / tuần</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Hàng đợi ưu tiên (Urgent Queue) -->
+      <div class="card queue-card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="section-title">Hàng đợi ưu tiên</h3>
+            <p class="section-desc">Hội thoại cần phản hồi hoặc khách hàng tiềm năng</p>
+          </div>
+          <button class="btn btn-outline btn-sm" (click)="navigateTo('/inbox')">
+            <span>Xem tất cả</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="queue-list">
+          @for (conv of mockData.conversations; track conv.id) {
+            <div class="queue-item" (click)="navigateTo('/inbox')">
+              <div class="queue-avatar">
+                <span>{{ conv.profile.name.charAt(0) }}</span>
+                <span class="channel-badge-mini" [ngClass]="conv.channelType === 'FACEBOOK' ? 'fb' : 'ig'"></span>
+              </div>
+              <div class="queue-info">
+                <div class="queue-name-row">
+                  <span class="queue-customer-name">{{ conv.profile.name }}</span>
+                  <span class="queue-time">{{ conv.lastMessageDate }}</span>
+                </div>
+                <p class="queue-msg-preview">{{ conv.lastMessage }}</p>
+                <div class="queue-tags">
+                  @if (conv.leadTemperature === 'HOT') {
+                    <span class="badge badge-warning">Hot Lead</span>
+                  }
+                  @if (conv.leadTemperature === 'COMPLAINT') {
+                    <span class="badge badge-danger">Khiếu nại</span>
+                  }
+                  @if (conv.aiConfidence) {
+                    <span class="badge badge-purple">
+                      AI: {{ (conv.aiConfidence * 100) | number:'1.0-0' }}%
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section: Recent Activity Timeline -->
+    <div class="card recent-activity-card">
+      <div class="card-header-flex">
+        <div>
+          <h3 class="section-title">Nhật ký hoạt động thời gian thực</h3>
+          <p class="section-desc">Các sự kiện Webhook, AI xử lý và phân loại tự động</p>
+        </div>
+        <div class="live-indicator">
+          <span class="status-dot status-dot-active"></span>
+          <span>Realtime Webhook Stream</span>
+        </div>
+      </div>
+
+      <div class="activity-table-wrapper">
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>THỜI GIAN</th>
+              <th>KÊNH</th>
+              <th>SỰ KIỆN</th>
+              <th>CHI TIẾT NỘI DUNG</th>
+              <th>PHÂN LOẠI</th>
+              <th>THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (act of recentActivities; track act.id) {
+              <tr>
+                <td class="td-time">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                  <span>{{ act.time }}</span>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="act.channel === 'FB' ? 'badge-meta' : 'badge-instagram'">
+                    {{ act.channel }}
+                  </span>
+                </td>
+                <td class="td-title">{{ act.title }}</td>
+                <td class="td-desc">{{ act.desc }}</td>
+                <td>
+                  <span class="badge" [ngClass]="'badge-' + act.badgeType">
+                    {{ act.badge }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn btn-outline btn-xs" (click)="navigateTo('/inbox')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Xem chi tiết</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,124 @@
+<div class="page-container comments-page">
+  <app-header
+    title="Comment Center"
+    subtitle="Tự động hóa phản hồi bình luận, ẩn spam và kích hoạt luồng gửi tin nhắn riêng (DM)"
+    actionText="Kịch bản comment"
+  ></app-header>
+
+  <div class="comments-layout">
+    <!-- Col 1: Posts List -->
+    <div class="posts-col">
+      <div class="posts-col-header">
+        <h3 class="posts-heading">Bài viết & Reel đang chạy</h3>
+        <span class="posts-count">{{ posts().length }} bài đăng</span>
+      </div>
+
+      <div class="posts-list">
+        @for (post of posts(); track post.id) {
+          <div
+            class="post-item"
+            [class.selected]="post.id === selectedPost().id"
+            (click)="selectPost(post)"
+          >
+            <div class="post-platform-badge" [ngClass]="post.channelType === 'FACEBOOK' ? 'fb' : 'ig'">
+              {{ post.channelType }}
+            </div>
+            <div class="post-title">{{ post.title }}</div>
+            <div class="post-meta">
+              <span class="unread-pill">{{ post.unreadCommentsCount }} mới</span>
+              <span class="total-comments">Tổng {{ post.totalCommentsCount }} bình luận</span>
+              <span class="post-date">{{ post.publishedDate }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Col 2: Comments Stream & Processing -->
+    <div class="comments-col">
+      <div class="comments-feed-header">
+        <div>
+          <h3 class="feed-title">Luồng bình luận trực tiếp</h3>
+          <p class="feed-subtitle">{{ selectedPost().title }}</p>
+        </div>
+        <div class="intent-legend">
+          <span class="badge badge-meta">ASK_PRICE</span>
+          <span class="badge badge-warning">PHONE_LEAD</span>
+          <span class="badge badge-danger">COMPLAINT</span>
+        </div>
+      </div>
+
+      <div class="comments-feed">
+        @for (cmt of comments(); track cmt.id) {
+          <div class="comment-card">
+            <div class="cmt-top-row">
+              <div class="cmt-author">
+                <div class="author-avatar">{{ cmt.authorName.charAt(0) }}</div>
+                <div class="author-info">
+                  <span class="author-name">{{ cmt.authorName }}</span>
+                  <span class="cmt-time">{{ cmt.commentDate }}</span>
+                </div>
+              </div>
+
+              <!-- AI Intent Badge & Confidence -->
+              <div class="cmt-intent-wrapper">
+                <span class="badge badge-meta">
+                  Ý định: {{ cmt.intent }}
+                </span>
+                <span class="confidence-pill">
+                  {{ (cmt.confidence * 100) | number:'1.0-0' }}% tự tin
+                </span>
+              </div>
+            </div>
+
+            <!-- Customer Comment Content -->
+            <div class="cmt-content-box">
+              {{ cmt.content }}
+            </div>
+
+            <!-- AI Suggested Response Box -->
+            @if (cmt.suggestedReply) {
+              <div class="ai-reply-box">
+                <div class="ai-reply-header">
+                  <div class="ai-reply-label">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                    </svg>
+                    <span>Câu trả lời tự động gợi ý bởi AI</span>
+                  </div>
+                  <span class="badge badge-success">Sẵn sàng xuất bản</span>
+                </div>
+                <p class="ai-reply-text">{{ cmt.suggestedReply }}</p>
+              </div>
+            }
+
+            <!-- Quick Action Bar -->
+            <div class="cmt-action-bar">
+              <button class="btn btn-primary btn-sm" (click)="replyComment(cmt)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 10 4 15 9 20"></polyline>
+                  <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+                </svg>
+                <span>Trả lời</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" (click)="sendDm(cmt)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                <span>Gửi tin nhắn riêng (DM)</span>
+              </button>
+              <button class="btn btn-outline btn-sm" (click)="hideComment(cmt)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+                <span>Ẩn comment</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

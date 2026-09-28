@@ -1,0 +1,138 @@
+<div class="page-container lead-page">
+  <app-header
+    title="Khách hàng & Lead"
+    subtitle="Phân loại tự động, chấm điểm tiềm năng (AI Score) và quản lý phễu chuyển đổi"
+    actionText="+ Thêm lead mới"
+  ></app-header>
+
+  <div class="lead-content">
+    <!-- Pipeline Status Bar -->
+    <div class="pipeline-bar">
+      @for (stage of pipelineStats; track stage.label) {
+        <div class="pipeline-stage-card" [ngClass]="'stage-' + stage.color">
+          <span class="stage-label">{{ stage.label }}</span>
+          <span class="stage-count">{{ stage.count }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Main Table Container -->
+    <div class="lead-table-card card">
+      <div class="lead-table-header">
+        <h3 class="section-title">Danh sách khách hàng tiềm năng</h3>
+        <div class="table-actions">
+          <button class="btn btn-outline btn-sm">Xuất Excel</button>
+          <button class="btn btn-outline btn-sm">Lọc nâng cao</button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="leads-table">
+          <thead>
+            <tr>
+              <th>KHÁCH HÀNG</th>
+              <th>SỐ ĐIỆN THOẠI</th>
+              <th>NGUỒN KÊNH</th>
+              <th>TIỀM NĂNG (AI SCORE)</th>
+              <th>SẢN PHẨM QUAN TÂM</th>
+              <th>PHỤ TRÁCH</th>
+              <th>TƯƠNG TÁC CUỐI</th>
+              <th>THAO TÁC</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lead of leads(); track lead.id) {
+              <tr
+                class="lead-row"
+                [class.selected]="selectedLead()?.id === lead.id"
+                (click)="selectLead(lead)"
+              >
+                <td class="td-customer">
+                  <div class="customer-avatar">{{ lead.name.charAt(0) }}</div>
+                  <div class="customer-name-meta">
+                    <span class="c-name">{{ lead.name }}</span>
+                    <span class="c-email">{{ lead.email || 'Chưa có email' }}</span>
+                  </div>
+                </td>
+                <td class="td-phone font-mono">{{ lead.phone || 'Chưa cung cấp' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="lead.platform === 'FACEBOOK' ? 'badge-meta' : 'badge-instagram'">
+                    {{ lead.platform }}
+                  </span>
+                </td>
+                <td>
+                  <div class="ai-score-pill">
+                    <span class="score-badge" [ngClass]="lead.temperature === 'HOT' ? 'hot' : 'warm'">
+                      {{ lead.aiScore }}
+                    </span>
+                    <span class="temp-text">{{ lead.temperature }}</span>
+                  </div>
+                </td>
+                <td class="td-product">{{ lead.interestProduct }}</td>
+                <td>
+                  <span class="agent-pill">{{ lead.assignedTo || 'Chưa gán' }}</span>
+                </td>
+                <td class="td-time">{{ lead.lastInteraction }}</td>
+                <td>
+                  <button class="btn btn-outline btn-xs" (click)="$event.stopPropagation(); selectLead(lead)">
+                    Chi tiết
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Lead Detail Drawer / Modal when selected -->
+    @if (selectedLead()) {
+      <div class="lead-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title-group">
+            <h3 class="drawer-title">{{ selectedLead()?.name }}</h3>
+            <span class="badge badge-warning">{{ selectedLead()?.temperature }} LEAD</span>
+          </div>
+          <button class="drawer-close-btn" (click)="closeDrawer()">✕</button>
+        </div>
+
+        <div class="drawer-body">
+          <div class="drawer-section">
+            <h4 class="dr-heading">Thông tin liên hệ</h4>
+            <div class="dr-field">
+              <span class="dr-label">Số điện thoại:</span>
+              <span class="dr-val text-primary font-mono">{{ selectedLead()?.phone || 'Chưa có' }}</span>
+            </div>
+            <div class="dr-field">
+              <span class="dr-label">Sản phẩm quan tâm:</span>
+              <span class="dr-val">{{ selectedLead()?.interestProduct }}</span>
+            </div>
+            <div class="dr-field">
+              <span class="dr-label">Giai đoạn:</span>
+              <span class="badge badge-info">{{ selectedLead()?.stage }}</span>
+            </div>
+          </div>
+
+          <div class="drawer-section">
+            <h4 class="dr-heading">Ghi chú & Nhu cầu</h4>
+            <p class="dr-notes-text">{{ selectedLead()?.notes || 'Không có ghi chú thêm.' }}</p>
+          </div>
+
+          <div class="drawer-section">
+            <h4 class="dr-heading">Phân loại Tags</h4>
+            <div class="tags-container">
+              @for (tag of selectedLead()?.tags; track tag) {
+                <span class="badge badge-purple">{{ tag }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="drawer-actions">
+            <button class="btn btn-primary btn-sm">Gọi điện tư vấn</button>
+            <button class="btn btn-outline btn-sm">Nhắn tin Messenger</button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
