@@ -28,7 +28,7 @@ Hệ thống quản lý tương tác đa kênh (Facebook Fanpage & Instagram Bus
 
 ---
 
-## 🚀 Hướng dẫn khởi chạy Frontend
+## khởi chạy Frontend
 
 ```bash
 # Di chuyển vào thư mục frontend
@@ -41,4 +41,3 @@ npm install
 npm start
 ```
 
-Ứng dụng sẽ hoạt động tại: `http://localhost:4200/`
