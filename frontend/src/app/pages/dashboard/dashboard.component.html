@@ -6,6 +6,31 @@
     (actionClick)="navigateTo('/automations')"
   ></app-header>
 
+  @if (exportSuccessMsg()) {
+    <div class="alert-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ exportSuccessMsg() }}</span>
+    </div>
+  }
+
+  <div class="dashboard-top-actions">
+    <div class="live-status-pill">
+      <span class="status-pulse-dot"></span>
+      <span>Hệ thống AI đang trực tuyến & phản hồi realtime</span>
+    </div>
+    <button class="btn btn-outline btn-sm" (click)="openExportModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      <span>Xuất báo cáo (Export)</span>
+    </button>
+  </div>
+
   <div class="dashboard-content">
     <!-- Top 4 KPI Cards -->
     <div class="kpi-grid">
@@ -260,4 +285,81 @@
       </div>
     </div>
   </div>
+
+  <!-- Popup / Modal: Export Dashboard (COMPLETE / B1 / Popup / Export Dashboard) -->
+  @if (showExportModal()) {
+    <div class="modal-backdrop" (click)="closeExportModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h3 class="modal-title">Xuất dữ liệu Dashboard</h3>
+            <p class="modal-sub">Trích xuất chỉ số vận hành, KPI và hội thoại theo thời gian</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeExportModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Định dạng xuất file</label>
+            <div class="format-options">
+              <label class="radio-option" [class.selected]="exportFormat === 'PDF'">
+                <input type="radio" name="exportFormat" value="PDF" [(ngModel)]="exportFormat" />
+                <span class="format-badge pdf">PDF</span>
+                <span>Báo cáo tổng hợp</span>
+              </label>
+              <label class="radio-option" [class.selected]="exportFormat === 'CSV'">
+                <input type="radio" name="exportFormat" value="CSV" [(ngModel)]="exportFormat" />
+                <span class="format-badge csv">CSV</span>
+                <span>Dữ liệu bảng thô</span>
+              </label>
+              <label class="radio-option" [class.selected]="exportFormat === 'EXCEL'">
+                <input type="radio" name="exportFormat" value="EXCEL" [(ngModel)]="exportFormat" />
+                <span class="format-badge excel">XLSX</span>
+                <span>Excel Spreadsheet</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Khoảng thời gian báo cáo</label>
+            <select [(ngModel)]="exportRange">
+              <option value="TODAY">Hôm nay (Thời gian thực)</option>
+              <option value="7DAYS">7 ngày gần nhất (Khuyên dùng)</option>
+              <option value="30DAYS">30 ngày qua</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Trường dữ liệu trích xuất</label>
+            <div class="checkbox-list">
+              <label class="checkbox-item">
+                <input type="checkbox" [(ngModel)]="includeKPI" />
+                <span>Toàn bộ 4 nhóm chỉ số KPI & tỷ lệ tự động</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" [(ngModel)]="includeMessages" />
+                <span>Lịch sử tin nhắn & bình luận đã xử lý</span>
+              </label>
+              <label class="checkbox-item">
+                <input type="checkbox" [(ngModel)]="includeLeads" />
+                <span>Danh sách khách hàng tiềm năng (Lead) phát hiện</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeExportModal()">Hủy bỏ</button>
+          <button class="btn btn-primary" (click)="downloadExport()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Xuất file tải về</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

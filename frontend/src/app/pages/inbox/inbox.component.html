@@ -6,6 +6,16 @@
     actionText=""
   ></app-header>
 
+  @if (notificationMsg()) {
+    <div class="alert-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ notificationMsg() }}</span>
+    </div>
+  }
+
   <!-- 3-Column Omnichannel Inbox Layout -->
   <div class="inbox-container">
     <!-- Col 1: Conversations List -->
@@ -106,6 +116,15 @@
         </div>
 
         <div class="chat-header-actions">
+          <button class="btn btn-outline btn-sm" (click)="openAssignModal()" title="Phân công nhân viên chăm sóc">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <line x1="19" y1="8" x2="19" y2="14"></line>
+              <line x1="22" y1="11" x2="16" y2="11"></line>
+            </svg>
+            <span>Gán CSKH</span>
+          </button>
           <button class="btn btn-outline btn-sm" (click)="takeOver()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
@@ -113,11 +132,11 @@
             </svg>
             <span>Take over</span>
           </button>
-          <button class="btn btn-primary btn-sm">
+          <button class="btn btn-primary btn-sm" (click)="openCloseModal()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
-            <span>Đóng Lead</span>
+            <span>Đóng hội thoại</span>
           </button>
         </div>
       </div>
@@ -268,4 +287,85 @@
       </div>
     </div>
   </div>
+
+  <!-- Popup / Modal: Assign Conversation (COMPLETE / B1 / Popup / Assign Conversation) -->
+  @if (showAssignModal()) {
+    <div class="modal-backdrop" (click)="closeAssignModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Phân công cuộc hội thoại</h3>
+          <button class="modal-close-btn" (click)="closeAssignModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="target-conv-preview">
+            <span class="text-secondary text-sm">Khách hàng: </span>
+            <span class="font-semibold text-primary">{{ selectedConversation().profile.name }}</span>
+            <span class="badge" [ngClass]="selectedConversation().channelType === 'FACEBOOK' ? 'badge-meta' : 'badge-instagram'">
+              {{ selectedConversation().channelType }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label>Chọn nhân viên CSKH phụ trách</label>
+            <select [(ngModel)]="assigneeName">
+              <option value="Hồng Nhung (Agent CSKH)">Hồng Nhung (Agent CSKH) – Trực Facebook</option>
+              <option value="Lan Phương (Agent CSKH)">Lan Phương (Agent CSKH) – Trực Instagram</option>
+              <option value="Minh Anh (Admin)">Minh Anh (Admin) – Quản lý ca</option>
+              <option value="AI Agent Mia">AI Agent Mia (Chế độ tự động)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ghi chú chuyển giao nội bộ (Tùy chọn)</label>
+            <textarea
+              rows="3"
+              [(ngModel)]="assignNote"
+              placeholder="Ví dụ: Khách đang cần tư vấn gói ship hỏa tốc và giảm giá sinh nhật..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeAssignModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="confirmAssign()">Xác nhận phân công</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: Close Conversation (COMPLETE / B1 / Popup / Close Conversation) -->
+  @if (showCloseModal()) {
+    <div class="modal-backdrop" (click)="closeCloseModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Xác nhận hoàn tất & đóng hội thoại</h3>
+          <button class="modal-close-btn" (click)="closeCloseModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-secondary text-sm">
+            Bạn có chắc chắn muốn đóng cuộc trò chuyện với khách hàng
+            <strong class="text-primary">{{ selectedConversation().profile.name }}</strong> không?
+            Hội thoại sẽ được chuyển vào mục ĐÃ GIẢI QUYẾT.
+          </p>
+
+          <div class="form-group">
+            <label>Lý do đóng cuộc trò chuyện</label>
+            <select [(ngModel)]="closeReason">
+              <option value="Đã giải đáp và khách hàng hài lòng">Đã giải đáp và khách hàng hài lòng</option>
+              <option value="Đã chốt đơn hàng thành công">Đã chốt đơn hàng thành công (Tạo Lead)</option>
+              <option value="Khách hàng không phản hồi quá 24h">Khách hàng không phản hồi quá 24h</option>
+              <option value="Spam / Tin nhắn quấy rối">Spam / Tin nhắn quấy rối</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeCloseModal()">Quay lại</button>
+          <button class="btn btn-primary" (click)="confirmClose()">Xác nhận đóng</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

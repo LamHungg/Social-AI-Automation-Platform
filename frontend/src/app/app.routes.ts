@@ -47,6 +47,36 @@ export const routes: Routes = [
     title: 'Báo cáo & Phân tích – META FLOW'
   },
   {
+    path: 'facebook-personal',
+    loadComponent: () => import('./pages/facebook-personal/facebook-personal.component').then(m => m.FacebookPersonalComponent),
+    title: 'Facebook Cá nhân (Browser Automation) – META FLOW'
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.component').then(m => m.SettingsComponent),
+    title: 'Cài đặt hệ thống – META FLOW'
+  },
+  {
+    path: 'members',
+    loadComponent: () => import('./pages/members/members.component').then(m => m.MembersComponent),
+    title: 'Thành viên & Phân quyền – META FLOW'
+  },
+  {
+    path: 'audit-logs',
+    loadComponent: () => import('./pages/audit-log/audit-log.component').then(m => m.AuditLogComponent),
+    title: 'Audit Log – META FLOW'
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/auth/login/login.component').then(m => m.LoginComponent),
+    title: 'Đăng nhập – META FLOW'
+  },
+  {
+    path: 'onboarding',
+    loadComponent: () => import('./pages/onboarding/onboarding.component').then(m => m.OnboardingComponent),
+    title: 'Khởi tạo Workspace – META FLOW'
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

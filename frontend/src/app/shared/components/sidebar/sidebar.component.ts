@@ -64,9 +64,21 @@ export class SidebarComponent {
       iconSvg: 'channels'
     },
     {
+      path: '/facebook-personal',
+      label: 'Facebook cá nhân',
+      badge: 'LIVE',
+      badgeType: 'info',
+      iconSvg: 'personal'
+    },
+    {
       path: '/analytics',
       label: 'Báo cáo',
       iconSvg: 'analytics'
+    },
+    {
+      path: '/settings',
+      label: 'Cài đặt',
+      iconSvg: 'settings'
     },
   ];
 }

@@ -144,6 +144,8 @@ export interface AiAgentConfig {
   autoSolveRate: number;
   csatScore: number;
   escalationRate: number;
+  model?: string;
+  temperature?: number;
 }
 
 // Analytics
@@ -156,4 +158,86 @@ export interface AnalyticsKPI {
   hotLeadsGrowth: number;
   escalationCount: number;
   escalationPercent: number;
+}
+
+// Members & Roles (B5)
+export type RoleType = 'Admin' | 'Agent' | 'Analyst' | 'Viewer';
+
+export interface WorkspaceMember {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  role: RoleType;
+  channelScope: string; // e.g. "All", "Facebook", "Instagram", "All - Read"
+  status: 'ACTIVE' | 'INVITED' | 'SUSPENDED';
+  lastActive: string;
+}
+
+export interface RoleDetail {
+  role: RoleType;
+  userCount: number;
+  description: string;
+  permissions: {
+    canViewAndReplyInbox: boolean;
+    canModerateComment: boolean;
+    canManageLeads: boolean;
+    canRunAutomationTest: boolean;
+    canManageWorkspace: boolean;
+  };
+}
+
+// Audit Log (B5)
+export interface AuditLogItem {
+  id: string;
+  timestamp: string;
+  user: string;
+  module: 'Channel' | 'Inbox' | 'Lead' | 'Comment' | 'AI Agent' | 'Automation' | 'Security';
+  action: string;
+  target: string;
+  result: 'SUCCESS' | 'FAILED' | 'WARNING';
+  details?: string;
+}
+
+// Facebook Personal Profile Automation (B3 / B5)
+export interface FacebookPersonalProfile {
+  id: string;
+  accountName: string;
+  sessionStatus: 'READY' | 'EXPIRED' | 'CHECKPOINT' | 'DISCONNECTED';
+  autoSendEnabled: boolean;
+  queuePendingCount: number;
+  lastActivityTime: string;
+  capabilities: {
+    readMessenger: boolean;
+    autoSendMessenger: boolean;
+    readComment: boolean;
+    autoReplyComment: boolean;
+    aiReply: boolean;
+    automation: boolean;
+  };
+  browserSession: {
+    mode: 'BROWSER_AUTOMATION' | 'API_CONNECTOR';
+    workerId: string;
+    pollingInterval: string;
+    lastCheckpoint: string;
+    proxy?: string;
+  };
+}
+
+export interface FbWorkerJob {
+  id: string;
+  type: 'SEND_MESSAGE' | 'REPLY_COMMENT' | 'READ_THREAD' | 'CHECK_STATUS';
+  target: string;
+  result: 'SUCCESS' | 'FAILED' | 'RETRY 1/3' | 'RUNNING';
+  time: string;
+}
+
+// Workspace Settings (B4)
+export interface WorkspaceSettings {
+  workspaceName: string;
+  timezone: string;
+  language: string;
+  defaultAssignee: string;
+  autoAiFallback: boolean;
+  security2FA: boolean;
 }

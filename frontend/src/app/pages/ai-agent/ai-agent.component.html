@@ -6,6 +6,33 @@
     (actionClick)="saveConfig()"
   ></app-header>
 
+  @if (notificationMsg()) {
+    <div class="alert-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ notificationMsg() }}</span>
+    </div>
+  }
+  <div class="agent-top-actions">
+    <div class="agent-selector-pill">
+      <span class="dot-online"></span>
+      <span>Đang quản lý: <strong>{{ config().name }}</strong> ({{ config().model }})</span>
+    </div>
+    <div class="agent-actions-group">
+      <button class="btn btn-outline btn-sm" (click)="openAddAgentModal()">
+        + Tạo Agent mới (Template)
+      </button>
+      <button class="btn btn-outline btn-sm" (click)="openTestAgentModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Mở rộng Sandbox Test
+      </button>
+    </div>
+  </div>
+
   <div class="ai-agent-layout">
     <!-- Col 1: Persona & Prompt Settings -->
     <div class="config-col">
@@ -31,45 +58,56 @@
 
         <div class="form-group">
           <label>Tên đại diện AI</label>
-          <input type="text" [value]="config().name" />
+          <input type="text" [(ngModel)]="config().name" />
         </div>
 
         <div class="form-group">
           <label>Mô tả vai trò</label>
-          <input type="text" [value]="config().roleDescription" />
+          <input type="text" [(ngModel)]="config().roleDescription" />
         </div>
 
         <div class="form-row">
           <div class="form-group flex-1">
             <label>Tone giọng mặc định</label>
-            <select>
-              <option selected>Thân thiện & Tận tâm (Friendly)</option>
-              <option>Chuyên nghiệp & Chuẩn mực (Professional)</option>
-              <option>Ngắn gọn & Súc tích (Concise)</option>
+            <select [(ngModel)]="config().defaultTone">
+              <option value="FRIENDLY">Thân thiện & Tận tâm (Friendly)</option>
+              <option value="PROFESSIONAL">Chuyên nghiệp & Chuẩn mực (Professional)</option>
+              <option value="CONCISE">Ngắn gọn & Súc tích (Concise)</option>
             </select>
           </div>
           <div class="form-group flex-1">
             <label>Ngôn ngữ chính</label>
-            <select>
-              <option selected>Tiếng Việt (Vietnamese)</option>
-              <option>English</option>
+            <select [(ngModel)]="config().language">
+              <option value="Tiếng Việt">Tiếng Việt (Vietnamese)</option>
+              <option value="English">English</option>
             </select>
           </div>
         </div>
 
         <div class="toggle-row">
           <label class="toggle-check">
-            <input type="checkbox" [checked]="config().useEmojis" />
+            <input type="checkbox" [(ngModel)]="config().useEmojis" />
             <span>Sử dụng Icon / Emoji thân thiện trong câu trả lời</span>
           </label>
         </div>
       </div>
 
-      <!-- Section: System Prompt -->
+      <!-- Section: System Prompt & Version History -->
       <div class="config-card card">
-        <h3 class="section-title">System Prompt (Chỉ dẫn hệ thống)</h3>
-        <p class="section-desc">Định hình quy tắc ứng xử, cách thu thập SĐT và kiến thức sản phẩm</p>
-        <textarea rows="8" class="prompt-textarea" [value]="config().systemPrompt"></textarea>
+        <div class="prompt-header-row">
+          <div>
+            <h3 class="section-title">System Prompt (Chỉ dẫn hệ thống)</h3>
+            <p class="section-desc">Định hình quy tắc ứng xử, cách thu thập SĐT và kiến thức sản phẩm</p>
+          </div>
+          <button class="btn btn-outline btn-xs" (click)="openHistoryModal()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Lịch sử phiên bản (v12)</span>
+          </button>
+        </div>
+        <textarea rows="8" class="prompt-textarea" [(ngModel)]="config().systemPrompt"></textarea>
       </div>
 
       <!-- Section: Fallback & Handoff -->
@@ -79,7 +117,7 @@
 
         <div class="form-group">
           <label>Ngưỡng tin cậy tối thiểu (Fallback Threshold)</label>
-          <input type="number" step="0.05" min="0.1" max="1" [value]="config().fallbackThreshold" />
+          <input type="number" step="0.05" min="0.1" max="1" [(ngModel)]="config().fallbackThreshold" />
         </div>
 
         <div class="form-group">
@@ -101,7 +139,7 @@
             <h3 class="section-title">AI Sandbox Simulator</h3>
             <span class="live-dot-pill">● Trực tiếp</span>
           </div>
-          <button class="btn btn-outline btn-xs" (click)="sandboxMessages = []">Làm mới chat</button>
+          <button class="btn btn-outline btn-xs" (click)="resetSandboxChat()">Làm mới chat</button>
         </div>
 
         <!-- Chat Stream -->
@@ -109,7 +147,12 @@
           @for (msg of sandboxMessages; track msg.text) {
             <div class="sb-bubble-wrapper" [class.user]="msg.sender === 'user'" [class.ai]="msg.sender === 'ai'">
               <div class="sb-bubble">
-                <span class="sb-sender">{{ msg.sender === 'ai' ? 'Mia (AI)' : 'Bạn (Khách hàng)' }}</span>
+                <div class="sb-bubble-top">
+                  <span class="sb-sender">{{ msg.sender === 'ai' ? 'Mia (AI)' : 'Bạn (Khách hàng)' }}</span>
+                  @if (msg.confidence) {
+                    <span class="confidence-tag">{{ msg.confidence * 100 }}%</span>
+                  }
+                </div>
                 <p class="sb-text">{{ msg.text }}</p>
               </div>
             </div>
@@ -131,29 +174,283 @@
       <!-- Knowledge Base Documents -->
       <div class="kb-card card">
         <div class="kb-header">
-          <h3 class="section-title">Cơ sở tri thức (Knowledge Base)</h3>
-          <button class="btn btn-outline btn-xs">+ Thêm tài liệu</button>
+          <div>
+            <h3 class="section-title">Cơ sở tri thức (Knowledge Base)</h3>
+            <span class="text-secondary text-xs">{{ knowledgeDocs().length }} tài liệu đã kết nối</span>
+          </div>
+          <button class="btn btn-primary btn-xs" (click)="openKnowledgeModal()">+ Thêm tài liệu</button>
         </div>
 
         <div class="kb-docs-list">
-          <div class="kb-doc-item">
-            <div class="doc-icon">📄</div>
-            <div class="doc-info">
-              <span class="doc-title">Bảng giá iPhone & MacBook Q3-2026.pdf</span>
-              <span class="doc-meta">Đã đồng bộ • 142 sản phẩm</span>
+          @for (doc of knowledgeDocs(); track doc.id) {
+            <div class="kb-doc-item">
+              <div class="doc-icon">
+                {{ doc.type === 'PDF' ? '📄' : (doc.type === 'URL' ? '🌐' : '💬') }}
+              </div>
+              <div class="doc-info">
+                <span class="doc-title">{{ doc.name }}</span>
+                <span class="doc-meta">{{ doc.meta }}</span>
+              </div>
+              <span class="badge badge-success">{{ doc.status }}</span>
             </div>
-            <span class="badge badge-success">ACTIVE</span>
-          </div>
-          <div class="kb-doc-item">
-            <div class="doc-icon">📄</div>
-            <div class="doc-info">
-              <span class="doc-title">Chính sách bảo hành & Freeship EVN.docx</span>
-              <span class="doc-meta">Đã đồng bộ • 32 điều khoản</span>
-            </div>
-            <span class="badge badge-success">ACTIVE</span>
-          </div>
+          }
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Popup / Modal: Add Knowledge Source (COMPLETE / B3 / Popup / Add Knowledge Source) -->
+  @if (showKnowledgeModal()) {
+    <div class="modal-backdrop" (click)="closeKnowledgeModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Thêm nguồn tri thức mới</h3>
+          <button class="modal-close-btn" (click)="closeKnowledgeModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Phương thức cung cấp dữ liệu</label>
+            <div class="format-options">
+              <label class="radio-option" [class.selected]="knowledgeSourceType === 'FILE'">
+                <input type="radio" name="sourceType" value="FILE" [(ngModel)]="knowledgeSourceType" />
+                <span class="format-badge pdf">FILE</span>
+                <span>Tải tệp PDF/Docx</span>
+              </label>
+              <label class="radio-option" [class.selected]="knowledgeSourceType === 'URL'">
+                <input type="radio" name="sourceType" value="URL" [(ngModel)]="knowledgeSourceType" />
+                <span class="format-badge excel">URL</span>
+                <span>Crawl Website Link</span>
+              </label>
+              <label class="radio-option" [class.selected]="knowledgeSourceType === 'TEXT'">
+                <input type="radio" name="sourceType" value="TEXT" [(ngModel)]="knowledgeSourceType" />
+                <span class="format-badge csv">FAQ</span>
+                <span>Văn bản hỏi đáp</span>
+              </label>
+            </div>
+          </div>
+
+          @if (knowledgeSourceType === 'FILE') {
+            <div class="form-group">
+              <label>Tên tài liệu / Bảng giá</label>
+              <input type="text" [(ngModel)]="newDocName" placeholder="Bảng giá iPhone tháng 10.pdf" />
+              <div class="file-dropzone">
+                <span>📁 Kéo thả file PDF, DOCX vào đây hoặc click để chọn</span>
+              </div>
+            </div>
+          }
+
+          @if (knowledgeSourceType === 'URL') {
+            <div class="form-group">
+              <label>Đường dẫn trang web (URL)</label>
+              <input type="url" [(ngModel)]="newDocUrl" placeholder="https://evnshop.vn/chinh-sach-bao-hanh" />
+            </div>
+          }
+
+          @if (knowledgeSourceType === 'TEXT') {
+            <div class="form-group">
+              <label>Tên mục tri thức</label>
+              <input type="text" [(ngModel)]="newDocName" placeholder="Chính sách đổi trả 7 ngày" />
+            </div>
+            <div class="form-group">
+              <label>Nội dung câu hỏi & giải đáp</label>
+              <textarea rows="4" [(ngModel)]="newDocContent" placeholder="Nhập các điều khoản, câu trả lời mẫu..."></textarea>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeKnowledgeModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="saveKnowledgeDoc()">Đồng bộ vào AI</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: AI Prompt Version History (COMPLETE / B4 / AI Prompt Version History) -->
+  @if (showHistoryModal()) {
+    <div class="modal-backdrop" (click)="closeHistoryModal()">
+      <div class="modal-card card modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h3 class="modal-title">Lịch sử phiên bản System Prompt</h3>
+            <p class="modal-sub">Xem các thay đổi chỉ dẫn AI qua từng lần cập nhật và khôi phục khi cần</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeHistoryModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="versions-list">
+            @for (v of promptVersions(); track v.version) {
+              <div class="version-card" [class.current]="v.isCurrent">
+                <div class="version-header">
+                  <div class="version-meta">
+                    <span class="version-tag">{{ v.version }}</span>
+                    @if (v.isCurrent) {
+                      <span class="badge badge-success">HIỆN TẠI</span>
+                    }
+                    <span class="version-author">{{ v.author }}</span>
+                    <span class="version-date">• {{ v.date }}</span>
+                  </div>
+                  @if (!v.isCurrent) {
+                    <button class="btn btn-outline btn-xs" (click)="rollbackVersion(v)">
+                      Khôi phục bản này (Rollback)
+                    </button>
+                  }
+                </div>
+                <div class="version-note">{{ v.note }}</div>
+                <pre class="version-prompt-preview">{{ v.prompt }}</pre>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" (click)="closeHistoryModal()">Đóng</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: Add AI Agent (COMPLETE / B3 / Add AI Agent) -->
+  @if (showAddAgentModal()) {
+    <div class="modal-backdrop" (click)="closeAddAgentModal()">
+      <div class="modal-card modal-md card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Tạo AI Agent mới từ Mẫu (Template)</h3>
+            <p class="modal-subtitle">Lựa chọn phong cách trợ lý ảo được tối ưu sẵn cho doanh nghiệp</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeAddAgentModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tên AI Agent</label>
+            <input type="text" [(ngModel)]="newAgentName" placeholder="Ví dụ: Trợ lý Bán hàng Pro" />
+          </div>
+
+          <div class="form-group">
+            <label>Chọn Mẫu kịch bản sẵn có</label>
+            <div class="template-grid">
+              <label class="template-card" [class.selected]="selectedTemplate === 'SALES_BOT'" (click)="selectedTemplate = 'SALES_BOT'">
+                <div class="template-icon">🛍️</div>
+                <div class="template-name">Tư vấn Bán hàng & Chốt đơn</div>
+                <div class="template-sub">Tự động báo giá, thuyết phục khách hàng và xin SĐT để tạo Lead</div>
+              </label>
+
+              <label class="template-card" [class.selected]="selectedTemplate === 'CSKH_WARRANTY'" (click)="selectedTemplate = 'CSKH_WARRANTY'">
+                <div class="template-icon">🛡️</div>
+                <div class="template-name">CSKH & Tra cứu Bảo hành</div>
+                <div class="template-sub">Kiểm tra đơn hàng, chính sách đổi trả và hỗ trợ kỹ thuật</div>
+              </label>
+
+              <label class="template-card" [class.selected]="selectedTemplate === 'LEAD_QUALIFIER'" (click)="selectedTemplate = 'LEAD_QUALIFIER'">
+                <div class="template-icon">🎯</div>
+                <div class="template-name">Sàng lọc Lead Tiềm năng</div>
+                <div class="template-sub">Hỏi nhu cầu chi tiết, phân loại ngân sách và hẹn lịch gọi</div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Model LLM cốt lõi</label>
+            <select [(ngModel)]="selectedModel">
+              <option value="llama-3.3-70b-instruct">Meta Llama 3.3 70B Instruct (Tối ưu Tiếng Việt)</option>
+              <option value="gpt-4o">OpenAI GPT-4o (Xử lý đa thể thức)</option>
+              <option value="claude-3-5-sonnet">Anthropic Claude 3.5 Sonnet (Văn phong mượt mà)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeAddAgentModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="createAgentFromTemplate()">Khởi tạo Agent</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: Test AI Agent (COMPLETE / B3 / Popup / Test AI Agent) -->
+  @if (showTestAgentModal()) {
+    <div class="modal-backdrop" (click)="closeTestAgentModal()">
+      <div class="modal-card modal-lg card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Sandbox Test AI Agent (Toàn màn hình)</h3>
+            <p class="modal-subtitle">Kiểm thử trực tiếp phản hồi của <strong>{{ config().name }}</strong> với tài liệu Knowledge Base</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeTestAgentModal()">✕</button>
+        </div>
+
+        <div class="modal-body modal-test-grid">
+          <div class="test-chat-view">
+            <div class="chat-messages-scroll">
+              @for (msg of sandboxMessages; track $index) {
+                <div class="msg-bubble-wrap" [class.user]="msg.sender === 'user'" [class.ai]="msg.sender === 'ai'">
+                  <div class="msg-bubble">
+                    <p>{{ msg.text }}</p>
+                    @if (msg.confidence) {
+                      <span class="bubble-confidence">Confidence: {{ msg.confidence * 100 }}%</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="chat-input-bar">
+              <input
+                type="text"
+                [(ngModel)]="sandboxInput"
+                (keydown.enter)="sendSandboxMessage()"
+                placeholder="Nhập câu hỏi test... (Enter để gửi)"
+              />
+              <button class="btn btn-primary btn-sm" (click)="sendSandboxMessage()">Gửi</button>
+            </div>
+          </div>
+
+          <div class="test-debug-panel">
+            <h4 class="debug-title">Thông số Giám sát Realtime</h4>
+            <div class="debug-metric">
+              <span class="lbl">LLM Engine:</span>
+              <span class="val font-mono">{{ config().model }}</span>
+            </div>
+            <div class="debug-metric">
+              <span class="lbl">Độ sáng tạo (Temperature):</span>
+              <span class="val">{{ config().temperature }}</span>
+            </div>
+            <div class="debug-metric">
+              <span class="lbl">Nguồn Knowledge kích hoạt:</span>
+              <span class="val text-emerald font-semibold">3 tài liệu (100%)</span>
+            </div>
+            <div class="debug-metric">
+              <span class="lbl">Độ trễ trung bình (Latency):</span>
+              <span class="val font-mono text-emerald">240ms</span>
+            </div>
+            <div class="debug-metric">
+              <span class="lbl">Token ước tính:</span>
+              <span class="val font-mono">185 tokens / turn</span>
+            </div>
+
+            <div class="quick-questions">
+              <span class="qq-title">Câu hỏi test nhanh:</span>
+              <button class="qq-pill" (click)="sandboxInput = 'Bản Titan giá bao nhiêu và có khuyến mãi gì không?'; sendSandboxMessage()">
+                Báo giá iPhone Titan
+              </button>
+              <button class="qq-pill" (click)="sandboxInput = 'Chính sách bảo hành và đổi trả như thế nào?'; sendSandboxMessage()">
+                Bảo hành & đổi trả
+              </button>
+              <button class="qq-pill" (click)="sandboxInput = 'Shop ở đâu, có ship hỏa tốc không?'; sendSandboxMessage()">
+                Địa chỉ & ship hỏa tốc
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeTestAgentModal()">Đóng cửa sổ Test</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

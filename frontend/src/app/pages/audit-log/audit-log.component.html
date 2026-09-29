@@ -1,0 +1,106 @@
+<div class="page-container audit-log-page">
+  <app-header
+    title="Audit Log"
+    subtitle="Theo dõi thay đổi quan trọng để kiểm tra vận hành và bảo mật."
+    actionText="Xuất CSV"
+    (actionClick)="exportCsv()"
+  ></app-header>
+
+  <!-- Filter Bar Card -->
+  <div class="filter-card card">
+    <div class="filter-grid">
+      <div class="filter-group">
+        <label>Người dùng</label>
+        <select [ngModel]="filterUser()" (ngModelChange)="filterUser.set($event)">
+          <option value="Tất cả">Tất cả</option>
+          <option value="Minh Anh">Minh Anh</option>
+          <option value="AI Worker">AI Worker</option>
+          <option value="Automation">Automation</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Module</label>
+        <select [ngModel]="filterModule()" (ngModelChange)="filterModule.set($event)">
+          <option value="Tất cả">Tất cả</option>
+          <option value="Channel">Channel</option>
+          <option value="Inbox">Inbox</option>
+          <option value="Lead">Lead</option>
+          <option value="Comment">Comment</option>
+          <option value="AI Agent">AI Agent</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Action</label>
+        <select [ngModel]="filterAction()" (ngModelChange)="filterAction.set($event)">
+          <option value="Tất cả">Tất cả</option>
+          <option value="RECONNECT_SESSION">RECONNECT_SESSION</option>
+          <option value="AUTO_SEND">AUTO_SEND</option>
+          <option value="UPDATE_STAGE">UPDATE_STAGE</option>
+          <option value="SEND_DM">SEND_DM</option>
+          <option value="SEND_MESSAGE">SEND_MESSAGE</option>
+          <option value="PUBLISH_PROMPT">PUBLISH_PROMPT</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label>Ngày</label>
+        <input
+          type="date"
+          [ngModel]="filterDate()"
+          (ngModelChange)="filterDate.set($event)"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Table Card -->
+  <div class="log-table-card card">
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Người dùng</th>
+            <th>Module</th>
+            <th>Action</th>
+            <th>Đối tượng</th>
+            <th>Kết quả</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of filteredLogs(); track log.id) {
+            <tr>
+              <td class="font-mono text-secondary">{{ log.timestamp }}</td>
+              <td>
+                <div class="user-cell">
+                  <span class="user-badge" [ngClass]="log.user === 'AI Worker' ? 'ai' : (log.user === 'Automation' ? 'auto' : 'human')">
+                    {{ log.user.charAt(0) }}
+                  </span>
+                  <span class="user-name">{{ log.user }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="module-tag">{{ log.module }}</span>
+              </td>
+              <td class="font-mono text-primary font-semibold text-sm">{{ log.action }}</td>
+              <td class="text-secondary">{{ log.target }}</td>
+              <td>
+                <span class="badge" [ngClass]="log.result === 'SUCCESS' ? 'badge-success' : 'badge-danger'">
+                  {{ log.result }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-8 text-secondary">
+                Không tìm thấy bản ghi Audit Log nào phù hợp với bộ lọc.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

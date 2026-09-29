@@ -2,116 +2,319 @@
   <app-header
     title="Báo cáo & Phân tích"
     subtitle="Đo lường hiệu quả phễu chuyển đổi, tỷ lệ giải quyết tự động bằng AI và chỉ số chất lượng dịch vụ SLA"
-    actionText="Xuất báo cáo PDF"
+    actionText="Xuất báo cáo"
+    (actionClick)="openExportModal()"
   ></app-header>
 
+  <!-- Toast Notification -->
+  @if (toastMsg()) {
+    <div class="analytics-toast">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ toastMsg() }}</span>
+    </div>
+  }
+
   <div class="analytics-content">
-    <!-- Top 3 Big Stat Cards -->
-    <div class="stats-overview-grid">
-      <div class="stat-big-card card">
-        <span class="sb-label">TỔNG TIN NHẮN & COMMENT XỬ LÝ</span>
-        <div class="sb-value">3,842</div>
-        <span class="sb-sub text-emerald">+24.6% so với tháng trước</span>
-      </div>
+    <!-- View Switcher Tabs -->
+    <div class="analytics-tabs-bar">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'overview'"
+        (click)="activeTab.set('overview')"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="9"></rect>
+          <rect x="14" y="3" width="7" height="5"></rect>
+          <rect x="14" y="12" width="7" height="9"></rect>
+          <rect x="3" y="16" width="7" height="5"></rect>
+        </svg>
+        <span>Tổng quan Phễu & SLA</span>
+      </button>
 
-      <div class="stat-big-card card">
-        <span class="sb-label">TỶ LỆ GIẢI QUYẾT BẰNG AI</span>
-        <div class="sb-value text-primary">72.4%</div>
-        <span class="sb-sub">Tiết kiệm ~560 giờ làm việc CSKH</span>
-      </div>
-
-      <div class="stat-big-card card">
-        <span class="sb-label">LƯỢNG HOT LEAD THU THẬP</span>
-        <div class="sb-value text-amber">312</div>
-        <span class="sb-sub text-emerald">+45 lead so với tuần trước</span>
-      </div>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab() === 'drilldown'"
+        (click)="activeTab.set('drilldown')"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Phân tích Chuyên sâu (Drill-down)</span>
+        <span class="badge badge-accent">B4 Deep Dive</span>
+      </button>
     </div>
 
-    <!-- Funnel & Channel Breakdown Grid -->
-    <div class="analytics-main-grid">
-      <!-- Funnel Card -->
-      <div class="funnel-card card">
-        <h3 class="section-title">Phễu chuyển đổi khách hàng (Conversion Funnel)</h3>
-        <p class="section-desc">Từ tương tác bài viết/inbox đến chốt đơn thành công</p>
+    <!-- OVERVIEW TAB -->
+    @if (activeTab() === 'overview') {
+      <!-- Top 3 Big Stat Cards -->
+      <div class="stats-overview-grid">
+        <div class="stat-big-card card">
+          <span class="sb-label">TỔNG TIN NHẮN & COMMENT XỬ LÝ</span>
+          <div class="sb-value">3,842</div>
+          <span class="sb-sub text-emerald">+24.6% so với tháng trước</span>
+        </div>
 
-        <div class="funnel-bars-container">
-          @for (step of funnelSteps; track step.label) {
-            <div class="funnel-step">
-              <div class="step-meta">
-                <span class="step-name">{{ step.label }}</span>
-                <span class="step-counts">
-                  <strong>{{ step.count.toLocaleString() }}</strong> ({{ step.percent }})
-                </span>
-              </div>
-              <div class="step-bar-bg">
-                <div class="step-bar-fill" [ngClass]="'fill-' + step.color" [style.width]="step.percent"></div>
-              </div>
-            </div>
-          }
+        <div class="stat-big-card card">
+          <span class="sb-label">TỶ LỆ GIẢI QUYẾT BẰNG AI</span>
+          <div class="sb-value text-primary">72.4%</div>
+          <span class="sb-sub">Tiết kiệm ~560 giờ làm việc CSKH</span>
+        </div>
+
+        <div class="stat-big-card card">
+          <span class="sb-label">LƯỢNG HOT LEAD THU THẬP</span>
+          <div class="sb-value text-amber">312</div>
+          <span class="sb-sub text-emerald">+45 lead so với tuần trước</span>
         </div>
       </div>
 
-      <!-- SLA & Quality Card -->
-      <div class="sla-card card">
-        <h3 class="section-title">Chỉ số chất lượng dịch vụ (SLA)</h3>
-        <p class="section-desc">Mức độ hài lòng và cam kết thời gian phản hồi</p>
+      <!-- Funnel & SLA Main Grid -->
+      <div class="analytics-main-grid">
+        <!-- Funnel Card -->
+        <div class="funnel-card card">
+          <h3 class="section-title">Phễu chuyển đổi khách hàng (Conversion Funnel)</h3>
+          <p class="section-desc">Từ tương tác bài viết/inbox đến chốt đơn thành công</p>
 
-        <div class="sla-metrics-list">
-          <div class="sla-item">
-            <div class="sla-info">
-              <span class="sla-title">Thời gian phản hồi đầu tiên (FRT)</span>
-              <span class="sla-sub">Tiêu chuẩn: &lt; 30 giây</span>
-            </div>
-            <div class="sla-val text-emerald">4.8 giây</div>
-          </div>
-
-          <div class="sla-item">
-            <div class="sla-info">
-              <span class="sla-title">Độ tuân thủ SLA (SLA Compliance)</span>
-              <span class="sla-sub">Đạt 98.7% chỉ tiêu tuần</span>
-            </div>
-            <div class="sla-val text-emerald">98.7%</div>
-          </div>
-
-          <div class="sla-item">
-            <div class="sla-info">
-              <span class="sla-title">Điểm hài lòng khách hàng (CSAT)</span>
-              <span class="sla-sub">Dựa trên 450 lượt đánh giá</span>
-            </div>
-            <div class="sla-val text-amber">4.6 / 5.0 ⭐</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Top Automations Table -->
-    <div class="top-auto-card card">
-      <h3 class="section-title">Top kịch bản Automation hiệu quả nhất</h3>
-
-      <div class="table-wrapper">
-        <table class="auto-table">
-          <thead>
-            <tr>
-              <th>TÊN KỊCH BẢN</th>
-              <th>SỐ LẦN CHẠY</th>
-              <th>TỶ LỆ THÀNH CÔNG</th>
-              <th>LEAD TẠO RA</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (auto of topAutomations; track auto.name) {
-              <tr>
-                <td class="font-semibold">{{ auto.name }}</td>
-                <td>{{ auto.runs }} lượt</td>
-                <td class="text-emerald">{{ auto.successRate }}</td>
-                <td>
-                  <span class="badge badge-warning">{{ auto.leads }} leads</span>
-                </td>
-              </tr>
+          <div class="funnel-bars-container">
+            @for (step of funnelSteps; track step.label) {
+              <div class="funnel-step">
+                <div class="step-meta">
+                  <span class="step-name">{{ step.label }}</span>
+                  <span class="step-counts">
+                    <strong>{{ step.count.toLocaleString() }}</strong> ({{ step.percent }})
+                  </span>
+                </div>
+                <div class="step-bar-bg">
+                  <div class="step-bar-fill" [ngClass]="'fill-' + step.color" [style.width]="step.percent"></div>
+                </div>
+              </div>
             }
-          </tbody>
-        </table>
+          </div>
+        </div>
+
+        <!-- SLA & Quality Card -->
+        <div class="sla-card card">
+          <h3 class="section-title">Chỉ số chất lượng dịch vụ (SLA)</h3>
+          <p class="section-desc">Mức độ hài lòng và cam kết thời gian phản hồi</p>
+
+          <div class="sla-metrics-list">
+            <div class="sla-item">
+              <div class="sla-info">
+                <span class="sla-title">Thời gian phản hồi đầu tiên (FRT)</span>
+                <span class="sla-sub">Tiêu chuẩn: &lt; 30 giây</span>
+              </div>
+              <div class="sla-val text-emerald">4.8 giây</div>
+            </div>
+
+            <div class="sla-item">
+              <div class="sla-info">
+                <span class="sla-title">Độ tuân thủ SLA (SLA Compliance)</span>
+                <span class="sla-sub">Đạt 98.7% chỉ tiêu tuần</span>
+              </div>
+              <div class="sla-val text-emerald">98.7%</div>
+            </div>
+
+            <div class="sla-item">
+              <div class="sla-info">
+                <span class="sla-title">Điểm hài lòng khách hàng (CSAT)</span>
+                <span class="sla-sub">Dựa trên 450 lượt đánh giá</span>
+              </div>
+              <div class="sla-val text-amber">4.6 / 5.0 ⭐</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Top Automations Table -->
+      <div class="top-auto-card card">
+        <h3 class="section-title">Top kịch bản Automation hiệu quả nhất</h3>
+
+        <div class="table-wrapper">
+          <table class="auto-table">
+            <thead>
+              <tr>
+                <th>TÊN KỊCH BẢN</th>
+                <th>SỐ LẦN CHẠY</th>
+                <th>TỶ LỆ THÀNH CÔNG</th>
+                <th>LEAD TẠO RA</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (auto of topAutomations; track auto.name) {
+                <tr>
+                  <td class="font-semibold">{{ auto.name }}</td>
+                  <td>{{ auto.runs }}</td>
+                  <td class="text-emerald font-semibold">{{ auto.successRate }}</td>
+                  <td class="text-amber font-semibold">{{ auto.leads }} leads</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- DRILLDOWN TAB (COMPLETE / B4 / Analytics Drill-down) -->
+    @if (activeTab() === 'drilldown') {
+      <div class="drilldown-container">
+        <!-- Channel-by-Channel Matrix -->
+        <div class="card drilldown-card">
+          <div class="card-header-flex">
+            <div>
+              <h3 class="section-title">Ma trận hiệu suất chi tiết theo từng Kênh kết nối</h3>
+              <p class="section-desc">Phân tích thời gian phản hồi thực tế, tỷ lệ tự động hóa AI và lượng Lead mang lại</p>
+            </div>
+            <button class="btn btn-outline btn-sm" (click)="openExportModal()">Xuất bảng dữ liệu</button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="auto-table drill-table">
+              <thead>
+                <tr>
+                  <th>TÊN KÊNH</th>
+                  <th>INBOUND</th>
+                  <th>AI GIẢI QUYẾT</th>
+                  <th>CHUYỂN TIẾP (ESCALATE)</th>
+                  <th>TỐC ĐỘ (FRT)</th>
+                  <th>LEAD CHUYỂN ĐỔI</th>
+                  <th>CSAT</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of channelDrilldowns; track item.channel) {
+                  <tr>
+                    <td class="font-semibold text-primary">{{ item.channel }}</td>
+                    <td>{{ item.inbound.toLocaleString() }}</td>
+                    <td><span class="badge badge-success">{{ item.aiSolvedPercent }}</span></td>
+                    <td class="text-warning">{{ item.escalated }}</td>
+                    <td class="font-mono text-emerald">{{ item.frt }}</td>
+                    <td class="text-amber font-semibold">{{ item.leadConverted }}</td>
+                    <td>{{ item.csat }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Human vs AI Performance -->
+        <div class="card drilldown-card">
+          <h3 class="section-title">Hiệu suất Xử lý: AI Assistant vs Đội ngũ Nhân viên</h3>
+          <p class="section-desc">So sánh tốc độ phản hồi và tỷ lệ chốt đơn giữa Trợ lý AI và Nhân viên tư vấn</p>
+
+          <div class="table-wrapper">
+            <table class="auto-table drill-table">
+              <thead>
+                <tr>
+                  <th>ĐỐI TƯỢNG XỬ LÝ</th>
+                  <th>LƯỢT HỘI THOẠI</th>
+                  <th>TỐC ĐỘ PHẢN HỒI (FRT)</th>
+                  <th>ĐỘ CHÍNH XÁC AI / CSAT</th>
+                  <th>TỶ LỆ GIẢI QUYẾT TRỌN VẸN</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (agent of agentPerformances; track agent.agent) {
+                  <tr>
+                    <td class="font-semibold">{{ agent.agent }}</td>
+                    <td>{{ agent.handled.toLocaleString() }}</td>
+                    <td class="font-mono text-emerald">{{ agent.frt }}</td>
+                    <td>{{ agent.accuracy }}</td>
+                    <td class="font-semibold text-primary">{{ agent.resolutionRate }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Export Analytics Modal (COMPLETE / B4 / Popup / Export Analytics) -->
+  @if (showExportModal()) {
+    <div class="modal-backdrop" (click)="closeExportModal()">
+      <div class="modal-card modal-md" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Xuất Báo Cáo Phân Tích (Analytics Export)</h3>
+            <p class="modal-subtitle">Tùy chỉnh định dạng tệp tin, khung thời gian và chỉ số cần xuất</p>
+          </div>
+          <button class="close-btn" (click)="closeExportModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Định dạng xuất tệp</label>
+            <div class="format-options">
+              <label class="format-pill" [class.selected]="exportFormat === 'EXCEL'" (click)="exportFormat = 'EXCEL'">
+                <input type="radio" name="fmt" [checked]="exportFormat === 'EXCEL'" />
+                <span>Microsoft Excel (.xlsx)</span>
+              </label>
+              <label class="format-pill" [class.selected]="exportFormat === 'CSV'" (click)="exportFormat = 'CSV'">
+                <input type="radio" name="fmt" [checked]="exportFormat === 'CSV'" />
+                <span>CSV Raw Data (.csv)</span>
+              </label>
+              <label class="format-pill" [class.selected]="exportFormat === 'PDF'" (click)="exportFormat = 'PDF'">
+                <input type="radio" name="fmt" [checked]="exportFormat === 'PDF'" />
+                <span>PDF Summary Report (.pdf)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Khoảng thời gian báo cáo</label>
+            <select class="form-control" [(ngModel)]="exportDateRange">
+              <option value="7d">7 ngày gần nhất</option>
+              <option value="30d">30 ngày gần nhất (Khuyên dùng)</option>
+              <option value="this_month">Tháng này (01/09/2026 - Hôm nay)</option>
+              <option value="last_quarter">Quý trước (Q2/2026)</option>
+              <option value="custom">Tùy chỉnh ngày...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phạm vi Kênh cần trích xuất</label>
+            <div class="checkbox-row">
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="exportChannels.facebook" />
+                <span>Facebook Fanpages</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="exportChannels.instagram" />
+                <span>Instagram Direct</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="exportChannels.personal" />
+                <span>Facebook Profile Auto-Send</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="includeRawLogs" />
+              <span>Bao gồm log truy vết chi tiết từng sự kiện tin nhắn & Webhook</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeExportModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="downloadExportReport()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Tải xuống báo cáo
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  }
 </div>

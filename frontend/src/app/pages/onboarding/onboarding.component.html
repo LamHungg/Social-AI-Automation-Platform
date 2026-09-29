@@ -1,0 +1,111 @@
+<div class="onboarding-wrapper">
+  <div class="onboarding-container">
+    <!-- Header -->
+    <div class="onboarding-header">
+      <div class="logo-row">
+        <div class="brand-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+          </svg>
+        </div>
+        <span class="brand-name">META FLOW</span>
+      </div>
+      <h1 class="onboarding-title">Khởi tạo Workspace mới</h1>
+      <p class="onboarding-sub">Thiết lập không gian làm việc và kết nối kênh bán hàng của bạn chỉ trong 1 phút</p>
+    </div>
+
+    <!-- Onboarding Form Card -->
+    <div class="onboarding-card card">
+      <div class="form-section">
+        <h3 class="section-title">1. Thông tin doanh nghiệp</h3>
+        
+        <div class="form-group">
+          <label>Tên Workspace (Cửa hàng / Doanh nghiệp)</label>
+          <input
+            type="text"
+            [(ngModel)]="workspaceName"
+            placeholder="Ví dụ: Tech Store Vietnam"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label>Ngành hàng chính</label>
+            <select [(ngModel)]="industry">
+              <option value="RETAIL">Bán lẻ Công nghệ & Điện máy</option>
+              <option value="FASHION">Thời trang & Phụ kiện</option>
+              <option value="COSMETICS">Mỹ phẩm & Làm đẹp</option>
+              <option value="FB">Ẩm thực & Đồ uống (F&B)</option>
+              <option value="OTHER">Ngành hàng khác</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label>Quy mô tin nhắn & đơn hàng</label>
+            <select [(ngModel)]="scale">
+              <option value="SMALL">< 50 tương tác / ngày</option>
+              <option value="MEDIUM">50 - 200 tương tác / ngày</option>
+              <option value="LARGE">> 200 tương tác / ngày (Doanh nghiệp lớn)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3 class="section-title">2. Chọn kênh bạn muốn kết nối</h3>
+        <p class="section-desc">Bạn có thể kết nối ngay hoặc thêm sau trong mục Kênh kết nối</p>
+
+        <div class="channel-select-grid">
+          <label class="channel-card" [class.selected]="connectFb">
+            <input type="checkbox" [(ngModel)]="connectFb" />
+            <div class="channel-card-content">
+              <div class="channel-icon fb">FB</div>
+              <div class="channel-meta">
+                <span class="channel-title">Facebook Fanpage</span>
+                <span class="channel-desc">Tự động trả lời Messenger & Comment bài viết</span>
+              </div>
+            </div>
+          </label>
+
+          <label class="channel-card" [class.selected]="connectIg">
+            <input type="checkbox" [(ngModel)]="connectIg" />
+            <div class="channel-card-content">
+              <div class="channel-icon ig">IG</div>
+              <div class="channel-meta">
+                <span class="channel-title">Instagram Business</span>
+                <span class="channel-desc">Tự động phản hồi Direct & Story Mentions</span>
+              </div>
+            </div>
+          </label>
+
+          <label class="channel-card" [class.selected]="connectPersonal">
+            <input type="checkbox" [(ngModel)]="connectPersonal" />
+            <div class="channel-card-content">
+              <div class="channel-icon pers">👤</div>
+              <div class="channel-meta">
+                <span class="channel-title">Facebook Cá nhân (Browser Automation)</span>
+                <span class="channel-desc">Tự động gửi tin & tương tác tài khoản cá nhân qua Proxy</span>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="btn btn-primary btn-lg"
+          [disabled]="isSubmitting() || !workspaceName.trim()"
+          (click)="createWorkspace()"
+        >
+          @if (isSubmitting()) {
+            <span class="spinner-sm"></span>
+            <span>Đang tạo Workspace...</span>
+          } @else {
+            <span>Tạo Workspace & Bắt đầu →</span>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

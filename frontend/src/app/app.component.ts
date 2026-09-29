@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
 
 @Component({
@@ -12,4 +12,10 @@ import { SidebarComponent } from './shared/components/sidebar/sidebar.component'
 })
 export class AppComponent {
   title = 'META FLOW – AI Automation Platform';
+  public router = inject(Router);
+
+  isAuthRoute(): boolean {
+    const url = this.router.url;
+    return url.includes('/login') || url.includes('/onboarding');
+  }
 }

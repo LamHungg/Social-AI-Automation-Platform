@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { MockDataService } from '../../core/services/mock-data.service';
@@ -8,16 +9,48 @@ import { StateService } from '../../core/services/state.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, HeaderComponent],
+  imports: [CommonModule, FormsModule, HeaderComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent {
+  // Export Modal state (COMPLETE / B1 / Popup / Export Dashboard)
+  showExportModal = signal<boolean>(false);
+  exportFormat: 'PDF' | 'CSV' | 'EXCEL' = 'PDF';
+  exportRange: 'TODAY' | '7DAYS' | '30DAYS' = '7DAYS';
+  includeKPI = true;
+  includeMessages = true;
+  includeLeads = true;
+  exportSuccessMsg = signal<string>('');
+
   constructor(
     public mockData: MockDataService,
     public state: StateService,
     private router: Router
   ) {}
+
+  openExportModal(): void {
+    this.showExportModal.set(true);
+  }
+
+  closeExportModal(): void {
+    this.showExportModal.set(false);
+  }
+
+  downloadExport(): void {
+    const fileName = `MetaFlow_Dashboard_Export_${this.exportRange}_${Date.now()}.${this.exportFormat.toLowerCase() === 'excel' ? 'xlsx' : this.exportFormat.toLowerCase()}`;
+    const blob = new Blob([`Báo cáo Meta Flow Dashboard\nKhoảng thời gian: ${this.exportRange}\nĐịnh dạng: ${this.exportFormat}\nNgày xuất: ${new Date().toLocaleString()}`], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    this.closeExportModal();
+    this.exportSuccessMsg.set(`Đã xuất và tải file ${fileName} thành công!`);
+    setTimeout(() => this.exportSuccessMsg.set(''), 3500);
+  }
 
   readonly recentActivities = [
     {

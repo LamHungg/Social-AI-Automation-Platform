@@ -1,0 +1,226 @@
+<div class="page-container members-page">
+  <app-header
+    title="Thành viên & phân quyền"
+    subtitle="Quản lý người dùng, role và phạm vi kênh được phép thao tác."
+    actionText="+ Mời thành viên"
+    (actionClick)="openInviteModal()"
+  ></app-header>
+
+  @if (successMessage()) {
+    <div class="alert-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ successMessage() }}</span>
+    </div>
+  }
+
+  <!-- Top Metric Cards: Role Counts -->
+  <div class="roles-metrics-card card">
+    <div class="role-stat-item" [class.selected]="selectedRole() === 'Admin'" (click)="selectRole('Admin')">
+      <span class="role-stat-label">Admin</span>
+      <span class="role-stat-val">{{ roleDetails()['Admin'].userCount }}</span>
+    </div>
+    <div class="role-stat-item" [class.selected]="selectedRole() === 'Agent'" (click)="selectRole('Agent')">
+      <span class="role-stat-label">Agent</span>
+      <span class="role-stat-val text-primary">{{ roleDetails()['Agent'].userCount }}</span>
+    </div>
+    <div class="role-stat-item" [class.selected]="selectedRole() === 'Analyst'" (click)="selectRole('Analyst')">
+      <span class="role-stat-label">Analyst</span>
+      <span class="role-stat-val">{{ roleDetails()['Analyst'].userCount }}</span>
+    </div>
+    <div class="role-stat-item" [class.selected]="selectedRole() === 'Viewer'" (click)="selectRole('Viewer')">
+      <span class="role-stat-label">Viewer</span>
+      <span class="role-stat-val">{{ roleDetails()['Viewer'].userCount }}</span>
+    </div>
+  </div>
+
+  <!-- Main 2-Column Layout -->
+  <div class="members-layout">
+    <!-- Left Column: Members Table -->
+    <div class="members-table-col card">
+      <div class="table-header-row">
+        <h3 class="card-title">Thành viên</h3>
+        <span class="text-secondary text-sm">Tổng cộng: {{ members().length }} người dùng</span>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Người dùng</th>
+              <th>Role</th>
+              <th>Kênh</th>
+              <th>Trạng thái</th>
+              <th>Hoạt động</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of members(); track m.id) {
+              <tr [class.highlighted]="m.role === selectedRole()" (click)="selectRole(m.role)">
+                <td>
+                  <div class="user-cell">
+                    <div class="user-avatar-sm" [ngClass]="'avatar-' + m.role.toLowerCase()">
+                      {{ m.name.charAt(0) }}
+                    </div>
+                    <div>
+                      <div class="user-name">{{ m.name }}</div>
+                      <div class="user-email">{{ m.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="'badge-' + m.role.toLowerCase()">{{ m.role }}</span>
+                </td>
+                <td class="text-secondary font-medium">{{ m.channelScope }}</td>
+                <td>
+                  <span class="status-indicator" [ngClass]="m.status === 'ACTIVE' ? 'active' : 'invited'">
+                    ● {{ m.status }}
+                  </span>
+                </td>
+                <td class="text-secondary">{{ m.lastActive }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Right Column: Role & Permissions Panel -->
+    <div class="role-detail-col card">
+      <div class="role-panel-header">
+        <div class="role-title-group">
+          <h3 class="role-title">Role · {{ selectedRole() }}</h3>
+          <span class="pill-users">{{ roleDetails()[selectedRole()].userCount }} users</span>
+        </div>
+        <p class="role-desc">{{ roleDetails()[selectedRole()].description }}</p>
+      </div>
+
+      <div class="permissions-section">
+        <h4 class="perm-title">Quyền</h4>
+
+        <div class="perm-checklist">
+          <label class="perm-item" [class.editable]="isEditingRole()">
+            <input
+              type="checkbox"
+              [(ngModel)]="roleDetails()[selectedRole()].permissions.canViewAndReplyInbox"
+              [disabled]="!isEditingRole()"
+            />
+            <div class="perm-text">
+              <span class="perm-name">Xem & trả lời Inbox</span>
+              <span class="perm-sub">Đọc và phản hồi tin nhắn Messenger & Instagram Direct</span>
+            </div>
+          </label>
+
+          <label class="perm-item" [class.editable]="isEditingRole()">
+            <input
+              type="checkbox"
+              [(ngModel)]="roleDetails()[selectedRole()].permissions.canModerateComment"
+              [disabled]="!isEditingRole()"
+            />
+            <div class="perm-text">
+              <span class="perm-name">Moderate Comment</span>
+              <span class="perm-sub">Quản lý và trả lời bình luận công khai, ẩn spam</span>
+            </div>
+          </label>
+
+          <label class="perm-item" [class.editable]="isEditingRole()">
+            <input
+              type="checkbox"
+              [(ngModel)]="roleDetails()[selectedRole()].permissions.canManageLeads"
+              [disabled]="!isEditingRole()"
+            />
+            <div class="perm-text">
+              <span class="perm-name">Tạo / sửa Lead</span>
+              <span class="perm-sub">Gán nhãn khách hàng, chuyển giai đoạn phễu CRM</span>
+            </div>
+          </label>
+
+          <label class="perm-item" [class.editable]="isEditingRole()">
+            <input
+              type="checkbox"
+              [(ngModel)]="roleDetails()[selectedRole()].permissions.canRunAutomationTest"
+              [disabled]="!isEditingRole()"
+            />
+            <div class="perm-text">
+              <span class="perm-name">Chạy Automation test</span>
+              <span class="perm-sub">Chạy thử kịch bản giả lập trên môi trường Sandbox</span>
+            </div>
+          </label>
+
+          <label class="perm-item" [class.editable]="isEditingRole()">
+            <input
+              type="checkbox"
+              [(ngModel)]="roleDetails()[selectedRole()].permissions.canManageWorkspace"
+              [disabled]="!isEditingRole()"
+            />
+            <div class="perm-text">
+              <span class="perm-name">Quản trị Workspace</span>
+              <span class="perm-sub">Thêm/bớt kênh, thay đổi cài đặt hệ thống và phân quyền</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="role-actions">
+        <button
+          class="btn"
+          [ngClass]="isEditingRole() ? 'btn-success' : 'btn-primary'"
+          (click)="toggleEditRole()"
+        >
+          {{ isEditingRole() ? 'Lưu quyền đã sửa' : 'Chỉnh sửa role' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup / Modal: Invite Member -->
+  @if (showInviteModal()) {
+    <div class="modal-backdrop" (click)="closeInviteModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Mời thành viên vào Workspace</h3>
+          <button class="modal-close-btn" (click)="closeInviteModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Địa chỉ Email thành viên</label>
+            <input
+              type="email"
+              [(ngModel)]="inviteEmail"
+              placeholder="nhanvien@evnshop.vn"
+              autofocus
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Vai trò (Role)</label>
+            <select [(ngModel)]="inviteRole">
+              <option value="Admin">Admin (Quản trị viên toàn quyền)</option>
+              <option value="Agent">Agent (Nhân viên CSKH & Trực chat)</option>
+              <option value="Analyst">Analyst (Chuyên viên phân tích số liệu)</option>
+              <option value="Viewer">Viewer (Chỉ xem báo cáo)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Phạm vi kênh được phép thao tác</label>
+            <select [(ngModel)]="inviteChannelScope">
+              <option value="All">Tất cả kênh (Facebook & Instagram)</option>
+              <option value="Facebook">Chỉ Facebook Fanpage</option>
+              <option value="Instagram">Chỉ Instagram Business</option>
+              <option value="All - Read">Tất cả kênh (Chỉ đọc)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeInviteModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="sendInvite()">Gửi lời mời</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

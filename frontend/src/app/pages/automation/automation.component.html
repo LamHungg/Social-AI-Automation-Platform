@@ -3,7 +3,18 @@
     title="Automation Builder"
     subtitle="Xây dựng luồng tự động hóa trực quan (Trigger -> AI Condition -> Action Pipeline)"
     actionText="Tạo kịch bản mới"
+    (actionClick)="openCreateModal()"
   ></app-header>
+
+  @if (notificationMsg()) {
+    <div class="alert-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ notificationMsg() }}</span>
+    </div>
+  }
 
   <div class="builder-layout">
     <!-- Col 1: Rules List -->
@@ -21,11 +32,13 @@
             (click)="selectRule(rule)"
           >
             <div class="rule-top">
-              <span class="badge badge-success">ACTIVE</span>
+              <span class="badge" [ngClass]="rule.status === 'ACTIVE' ? 'badge-success' : 'badge-warning'">
+                {{ rule.status }}
+              </span>
               <span class="rule-runs">{{ rule.runsCount }} lượt chạy</span>
             </div>
             <div class="rule-name">{{ rule.name }}</div>
-            <div class="rule-desc">{{ rule.description }}</div>
+            <div class="rule-desc">{{ rule.description || 'Kịch bản tự động hóa' }}</div>
             <div class="rule-meta">
               <span class="rule-rate">Tỷ lệ thành công: {{ rule.successRate }}%</span>
             </div>
@@ -42,8 +55,19 @@
           <span class="canvas-updated">Cập nhật lần cuối: {{ selectedRule().updatedAt }}</span>
         </div>
         <div class="canvas-actions">
-          <button class="btn btn-outline btn-sm">Lưu bản nháp</button>
-          <button class="btn btn-primary btn-sm">Xuất bản luồng (Publish)</button>
+          <button class="btn btn-outline btn-sm" (click)="openTestModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Chạy thử (Test Automation)</span>
+          </button>
+          <button class="btn btn-outline btn-sm" (click)="openRunDetailModal()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+            <span>Lịch sử chạy (Run Detail)</span>
+          </button>
+          <button class="btn btn-primary btn-sm" (click)="openPublishModal()">Xuất bản luồng (Publish)</button>
         </div>
       </div>
 
@@ -192,4 +216,214 @@
       </div>
     </div>
   </div>
+
+  <!-- Popup / Modal: Create Automation Builder (COMPLETE / B2 / Create Automation Builder) -->
+  @if (showCreateModal()) {
+    <div class="modal-backdrop" (click)="closeCreateModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Tạo luồng kịch bản Automation mới</h3>
+          <button class="modal-close-btn" (click)="closeCreateModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Tên kịch bản</label>
+            <input type="text" [(ngModel)]="newRuleName" placeholder="Ví dụ: Tự động tư vấn & báo giá iPhone 17" autofocus />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Loại sự kiện kích hoạt (Trigger Type)</label>
+              <select [(ngModel)]="newRuleTriggerType">
+                <option value="INTENT">AI Intent (Ý định khách hàng)</option>
+                <option value="KEYWORD">Từ khóa chính xác (Keywords)</option>
+                <option value="POST_COMMENT">Bình luận bài viết cụ thể</option>
+                <option value="TIME_WINDOW">Khung giờ ngoài ca làm việc</option>
+              </select>
+            </div>
+
+            <div class="form-group flex-1">
+              <label>Ngưỡng tin cậy tối thiểu</label>
+              <input type="number" step="0.05" min="0.5" max="1.0" [(ngModel)]="newRuleConfidence" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Từ khóa / Ý định nhận diện (Phân cách bằng dấu phẩy)</label>
+            <input type="text" [(ngModel)]="newRuleTriggers" />
+          </div>
+
+          <div class="form-group">
+            <label>Hành động xử lý (Pipeline Actions)</label>
+            <select [(ngModel)]="newRuleActionType">
+              <option value="AI_REPLY_AND_LEAD">Trả lời tự động bằng AI + Bắt SĐT vào Lead CRM</option>
+              <option value="SEND_DM">Gửi tin nhắn riêng (DM) kèm voucher Flash Sale</option>
+              <option value="HUMAN_HANDOVER">Gán cờ khẩn cấp và chuyển nhân viên CSKH</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeCreateModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="saveNewRule()">Lưu kịch bản mới</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: Publish Automation (COMPLETE / B2 / Popup / Publish Automation) -->
+  @if (showPublishModal()) {
+    <div class="modal-backdrop" (click)="closePublishModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Xác nhận xuất bản kịch bản tự động</h3>
+          <button class="modal-close-btn" (click)="closePublishModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <p class="text-secondary text-sm">
+            Kịch bản <strong class="text-primary">{{ selectedRule().name }}</strong> sẽ được kích hoạt trực tiếp trên các kênh Facebook Fanpage & Instagram Business của bạn.
+          </p>
+
+          <div class="rule-summary-box">
+            <div class="sum-row">
+              <span class="sum-label">Trigger:</span>
+              <span class="sum-val font-semibold">{{ selectedRule().triggerType }}</span>
+            </div>
+            <div class="sum-row">
+              <span class="sum-label">Từ khóa nhận diện:</span>
+              <span class="sum-val text-primary">{{ selectedRule().triggers.join(', ') }}</span>
+            </div>
+            <div class="sum-row">
+              <span class="sum-label">Độ tin cậy yêu cầu:</span>
+              <span class="badge badge-success">{{ selectedRule().confidenceThreshold * 100 }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closePublishModal()">Quay lại</button>
+          <button class="btn btn-primary" (click)="confirmPublish()">Xác nhận Publish lên Live</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: Automation Run Detail (COMPLETE / B4 / Automation Run Detail) -->
+  @if (showRunDetailModal()) {
+    <div class="modal-backdrop" (click)="closeRunDetailModal()">
+      <div class="modal-card card modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-text">
+            <h3 class="modal-title">Lịch sử thực thi (Automation Run Detail)</h3>
+            <p class="modal-sub">Truy vết chi tiết từng lượt kích hoạt kịch bản và độ trễ xử lý</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeRunDetailModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Run ID</th>
+                  <th>Thời gian</th>
+                  <th>Nguồn</th>
+                  <th>Trigger Matched</th>
+                  <th>Độ tin cậy</th>
+                  <th>Độ trễ</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (log of runLogs(); track log.runId) {
+                  <tr>
+                    <td class="font-mono text-primary font-semibold">{{ log.runId }}</td>
+                    <td class="font-mono text-secondary text-xs">{{ log.time }}</td>
+                    <td class="text-secondary text-xs">{{ log.source }}</td>
+                    <td class="font-mono text-xs font-semibold">{{ log.triggerMatched }}</td>
+                    <td>
+                      <span class="text-emerald font-semibold">{{ log.confidence * 100 }}%</span>
+                    </td>
+                    <td class="font-mono text-xs">{{ log.latencyMs }}ms</td>
+                    <td>
+                      <span class="badge badge-success">{{ log.status }}</span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" (click)="closeRunDetailModal()">Đóng cửa sổ</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Popup / Modal: Test Automation (COMPLETE / B2 / Popup / Test Automation) -->
+  @if (showTestModal()) {
+    <div class="modal-backdrop" (click)="closeTestModal()">
+      <div class="modal-card card modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div>
+            <h3 class="modal-title">Chạy Thử Kịch Bản (Sandbox Test)</h3>
+            <p class="modal-subtitle">Kiểm thử kịch bản: <strong>{{ selectedRule().name }}</strong> với dữ liệu giả lập</p>
+          </div>
+          <button class="modal-close-btn" (click)="closeTestModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nội dung tin nhắn / bình luận giả lập</label>
+            <div class="input-with-button">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="testInputText"
+                placeholder="Nhập câu khách hàng nói để kiểm thử..."
+              />
+              <button class="btn btn-primary" (click)="runSimulation()">Kiểm tra kích hoạt</button>
+            </div>
+          </div>
+
+          @if (simulationResult) {
+            <div class="simulation-result-box">
+              <div class="sim-header">
+                <span class="sim-label">KẾT QUẢ PHÂN TÍCH INTENT</span>
+                <span class="badge badge-success">KHỚP ĐIỀU KIỆN ({{ simulationResult.confidence * 100 }}%)</span>
+              </div>
+
+              <div class="sim-intent-row">
+                <span class="font-semibold text-primary">Ý định nhận diện:</span>
+                <span class="font-mono text-emerald">{{ simulationResult.matchedIntent }}</span>
+              </div>
+
+              <div class="sim-actions-list">
+                <div class="sim-actions-title font-semibold text-secondary">Chuỗi hành động sẽ thực thi:</div>
+                @for (act of simulationResult.executedActions; track act; let idx = $index) {
+                  <div class="sim-action-item">
+                    <span class="sim-step-num">{{ idx + 1 }}</span>
+                    <span>{{ act }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="sim-placeholder">
+              <p class="text-secondary text-sm">Bấm "Kiểm tra kích hoạt" để giả lập luồng chạy từ Trigger -> Intent NLU -> Actions.</p>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeTestModal()">Đóng</button>
+          <button class="btn btn-primary" (click)="confirmPublish(); closeTestModal()">Kích hoạt kịch bản lên Live</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

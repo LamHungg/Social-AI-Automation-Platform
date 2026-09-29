@@ -283,3 +283,78 @@
   font-size: 11px;
   color: var(--text-muted);
 }
+
+/* Connected Channels Widget (Figma) */
+.sidebar-connected-channels {
+  padding: 12px 14px 4px 14px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.connected-channels-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.channel-widget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.channel-widget-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.channel-widget-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.channel-icon-mini {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.channel-icon-mini.fb {
+  background: #1877f2;
+}
+
+.channel-icon-mini.ig {
+  background: linear-gradient(135deg, #e1306c, #f77737);
+  font-size: 10px;
+}
+
+.channel-name-mini {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.channel-count-mini {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}

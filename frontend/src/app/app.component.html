@@ -1,6 +1,10 @@
-<div class="app-layout">
-  <app-sidebar></app-sidebar>
-  <main class="app-main-content">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+@if (isAuthRoute()) {
+  <router-outlet></router-outlet>
+} @else {
+  <div class="app-layout">
+    <app-sidebar></app-sidebar>
+    <main class="app-main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+}

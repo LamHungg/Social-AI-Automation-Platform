@@ -1,0 +1,337 @@
+<div class="page-container settings-page">
+  <app-header
+    title="Cài đặt"
+    subtitle="Quản lý workspace, thành viên, quyền và cấu hình hệ thống."
+    actionText="+ Mời thành viên"
+    (actionClick)="openInviteModal()"
+  ></app-header>
+
+  @if (saveSuccessMessage()) {
+    <div class="alert-banner">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      <span>{{ saveSuccessMessage() }}</span>
+    </div>
+  }
+
+  <div class="settings-layout">
+    <!-- Left Navigation Sub-Menu -->
+    <div class="settings-nav-col card">
+      <h3 class="nav-title">Cài đặt Workspace</h3>
+      <nav class="settings-subnav">
+        <button
+          class="subnav-item"
+          [class.active]="activeTab() === 'WORKSPACE'"
+          (click)="setTab('WORKSPACE')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+          <span>Thông tin Workspace</span>
+        </button>
+
+        <a
+          routerLink="/members"
+          class="subnav-item"
+          [class.active]="activeTab() === 'MEMBERS'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Thành viên & phân quyền</span>
+        </a>
+
+        <button
+          class="subnav-item"
+          [class.active]="activeTab() === 'NOTIFICATIONS'"
+          (click)="setTab('NOTIFICATIONS')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span>Thông báo</span>
+        </button>
+
+        <button
+          class="subnav-item"
+          [class.active]="activeTab() === 'SECURITY'"
+          (click)="setTab('SECURITY')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Bảo mật</span>
+        </button>
+
+        <button
+          class="subnav-item"
+          [class.active]="activeTab() === 'SYSTEM_STATES'"
+          (click)="setTab('SYSTEM_STATES')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Biến hệ thống (Shared States)</span>
+        </button>
+
+        <a
+          routerLink="/audit-logs"
+          class="subnav-item"
+          [class.active]="activeTab() === 'AUDIT'"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span>Audit Log</span>
+        </a>
+      </nav>
+    </div>
+
+    <!-- Right Content Panel -->
+    <div class="settings-content-col card">
+      @if (activeTab() === 'WORKSPACE') {
+        <h3 class="panel-section-title">Thông tin Workspace</h3>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Tên Workspace</label>
+            <input
+              type="text"
+              [(ngModel)]="settings().workspaceName"
+              placeholder="EVN Shop Automation"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Múi giờ</label>
+            <select [(ngModel)]="settings().timezone">
+              <option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh (GMT+7)</option>
+              <option value="Asia/Bangkok">Asia/Bangkok (GMT+7)</option>
+              <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ngôn ngữ</label>
+            <select [(ngModel)]="settings().language">
+              <option value="Tiếng Việt">Tiếng Việt</option>
+              <option value="English">English</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Default assignee</label>
+            <select [(ngModel)]="settings().defaultAssignee">
+              <option value="Sales Online">Sales Online</option>
+              <option value="CSKH Ca Ngày">CSKH Ca Ngày</option>
+              <option value="AI Auto Assigned">AI Auto Assigned</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Members Summary Table in Settings -->
+        <div class="members-summary-section">
+          <div class="section-header-row">
+            <h4 class="section-title">Thành viên</h4>
+            <a routerLink="/members" class="link-more">Xem tất cả thành viên →</a>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Người dùng</th>
+                  <th>Vai trò</th>
+                  <th>Trạng thái</th>
+                  <th>Kênh</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (m of members(); track m.id) {
+                  <tr>
+                    <td>
+                      <div class="user-cell">
+                        <div class="user-avatar-sm">{{ m.name.charAt(0) }}</div>
+                        <div>
+                          <div class="user-name">{{ m.name }}</div>
+                          <div class="user-email">{{ m.email }}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge" [ngClass]="'badge-' + m.role.toLowerCase()">{{ m.role }}</span>
+                    </td>
+                    <td>
+                      <span class="status-indicator" [ngClass]="m.status === 'ACTIVE' ? 'active' : 'invited'">
+                        ● {{ m.status }}
+                      </span>
+                    </td>
+                    <td class="text-secondary">{{ m.channelScope }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- Tab: Shared System States (COMPLETE / B4 / Shared System States) -->
+      @if (activeTab() === 'SYSTEM_STATES') {
+        <h3 class="panel-section-title">Biến Hệ Thống & Cấu Hình Webhook (Shared System States)</h3>
+        <p class="section-desc" style="margin-bottom: 20px;">Quản lý các biến môi trường toàn cục, Meta Webhook verify token và các feature flag dùng chung.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Meta Webhook Verify Token</label>
+            <input type="text" class="font-mono" [(ngModel)]="systemStates.metaWebhookVerifyToken" />
+          </div>
+
+          <div class="form-group">
+            <label>Meta App Secret Hash (HMAC-SHA256)</label>
+            <input type="password" class="font-mono" [(ngModel)]="systemStates.metaAppSecret" />
+          </div>
+
+          <div class="form-group">
+            <label>LLM Default Engine</label>
+            <select [(ngModel)]="systemStates.llmDefaultProvider">
+              <option value="llama-3.3-70b-instruct">Meta Llama 3.3 70B Instruct (Mặc định)</option>
+              <option value="gpt-4o">OpenAI GPT-4o</option>
+              <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ngưỡng Fallback Chuyển tiếp CSKH (Lần thất bại)</label>
+            <input type="number" [(ngModel)]="systemStates.aiFallbackLimit" />
+          </div>
+
+          <div class="form-group">
+            <label>Hạn mức gửi tin nhắn / phút (Rate Limit)</label>
+            <input type="number" [(ngModel)]="systemStates.rateLimitPerMinute" />
+          </div>
+        </div>
+
+        <div class="feature-flags-box" style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+          <h4 class="section-title">Feature Flags Toàn Hệ Thống</h4>
+          <label class="checkbox-label" style="display: flex; gap: 10px; align-items: center;">
+            <input type="checkbox" [(ngModel)]="systemStates.enableBrowserWorker" />
+            <span>Kích hoạt Browser Automation Worker (Puppeteer/Playwright cho Profile cá nhân)</span>
+          </label>
+          <label class="checkbox-label" style="display: flex; gap: 10px; align-items: center;">
+            <input type="checkbox" [(ngModel)]="systemStates.enableVoiceTranscription" />
+            <span>Chuyển đổi Voice Note sang Text (Speech-to-Text Whisper AI)</span>
+          </label>
+          <label class="checkbox-label" style="display: flex; gap: 10px; align-items: center;">
+            <input type="checkbox" [(ngModel)]="systemStates.enableAutoSpamDefense" />
+            <span>Tự động nhận diện và ẩn bình luận spam / chửi bậy / số điện thoại lừa đảo</span>
+          </label>
+        </div>
+      }
+
+      <!-- Tab: Notifications -->
+      @if (activeTab() === 'NOTIFICATIONS') {
+        <h3 class="panel-section-title">Cấu hình Kênh thông báo</h3>
+        <p class="section-desc" style="margin-bottom: 20px;">Nhận cảnh báo khi có sự cố ngắt kết nối kênh, phát hiện Hot Lead hoặc Checkpoint tài khoản.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Telegram Bot Alert Webhook</label>
+            <input type="text" placeholder="https://api.telegram.org/bot..." />
+          </div>
+          <div class="form-group">
+            <label>Email nhận báo cáo hằng ngày</label>
+            <input type="email" placeholder="admin@evnshop.vn" />
+          </div>
+        </div>
+      }
+
+      <!-- Tab: Security -->
+      @if (activeTab() === 'SECURITY') {
+        <h3 class="panel-section-title">Bảo mật & Phiên làm việc</h3>
+        <p class="section-desc" style="margin-bottom: 20px;">Thiết lập kiểm soát truy cập Workspace và xác thực 2 bước.</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Thời gian tự động đăng xuất phiên (Session Timeout)</label>
+            <select>
+              <option>12 giờ</option>
+              <option>24 giờ</option>
+              <option>7 ngày</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Bắt buộc 2FA cho tất cả thành viên</label>
+            <select>
+              <option>Bật (Bắt buộc với Admin & Agent)</option>
+              <option>Tắt</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      <!-- Bottom Actions -->
+      <div class="settings-actions-footer">
+        <button class="btn btn-primary" (click)="saveSettings()">
+          Lưu thay đổi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popup / Modal: Invite Member (COMPLETE / B5 / Popup / Invite Member) -->
+  @if (showInviteModal()) {
+    <div class="modal-backdrop" (click)="closeInviteModal()">
+      <div class="modal-card card" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3 class="modal-title">Mời thành viên vào Workspace</h3>
+          <button class="modal-close-btn" (click)="closeInviteModal()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Địa chỉ Email thành viên</label>
+            <input
+              type="email"
+              [(ngModel)]="inviteEmail"
+              placeholder="nhanvien@evnshop.vn"
+              autofocus
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Vai trò (Role)</label>
+            <select [(ngModel)]="inviteRole">
+              <option value="Admin">Admin (Quản trị viên toàn quyền)</option>
+              <option value="Agent">Agent (Nhân viên CSKH & Trực chat)</option>
+              <option value="Analyst">Analyst (Chuyên viên phân tích số liệu)</option>
+              <option value="Viewer">Viewer (Chỉ xem báo cáo)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Phạm vi kênh được phép thao tác</label>
+            <select [(ngModel)]="inviteChannelScope">
+              <option value="All">Tất cả kênh (Facebook & Instagram)</option>
+              <option value="Facebook">Chỉ Facebook Fanpage</option>
+              <option value="Instagram">Chỉ Instagram Business</option>
+              <option value="All - Read">Tất cả kênh (Chỉ đọc)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="closeInviteModal()">Hủy</button>
+          <button class="btn btn-primary" (click)="sendInvite()">Gửi lời mời</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
